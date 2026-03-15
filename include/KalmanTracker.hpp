@@ -21,7 +21,7 @@ public:
     Point3f update(const Point3f measuredPos, double timeStamp);
 
     // 获取当前最优估计的位置
-    Point3f getEstimedPosition() const;
+    Point3f getEstimatedPosition() const;
 
     // 获取预测的下一时刻位置（用于绘制）
     Point3f getPredictionPosition() const { return m_predictedPose; }

@@ -48,3 +48,76 @@ void KalmanTracker::setTransitionMatrix(double dt){
     F.at<float>(1, 4) = dt;
     F.at<float>(2, 5) = dt;
 }
+
+void KalmanTracker::init(const Point3f& position, double timeStamp){
+    // 初始化状态向量 [x, y, z, vx, vy, vz]
+    m_state = cv::Mat::zeros(6, 1, CV_32F);
+    m_state.at<float>(0) = position.x;
+    m_state.at<float>(1) = position.y;
+    m_state.at<float>(2) = position.z;
+    m_kf.statePost = m_state.clone();
+
+    m_lastTime = timeStamp;
+    m_predictedPose = position;
+    m_initialized = true;
+}
+
+Point3f KalmanTracker::predict(double timeStamp){
+    if(!m_initialized){
+        return Point3f(0, 0, 0);
+    }
+
+    // 计算时间间隔
+    if(m_lastTime > 0){
+        m_dt = timeStamp - m_lastTime;
+        // 限制最大时间间隔 防止dt过大导致发散
+        if(m_dt > 0.1) m_dt = 0.033;
+        if(m_dt < 0.001) m_dt = 0.033;
+    } else {
+        m_dt = 0.033;
+    }
+
+    setTransitionMatrix(m_dt);
+    m_state = m_kf.predict();
+
+    m_predictedPose.x = m_state.at<float>(0);
+    m_predictedPose.y = m_state.at<float>(1);
+    m_predictedPose.z = m_state.at<float>(2);
+
+    return m_predictedPose;
+}
+
+Point3f KalmanTracker::update(const Point3f measuredPos, double timeStamp){
+    if(!m_initialized){
+        init(measuredPos, timeStamp);
+        return measuredPos;
+    }
+
+    //先预测
+    predict(timeStamp);
+
+    m_measured = cv::Mat::zeros(3, 1, CV_32F);
+    m_measured.at<float>(0) = measuredPos.x;
+    m_measured.at<float>(1) = measuredPos.y;
+    m_measured.at<float>(2) = measuredPos.z;
+
+    m_state = m_kf.correct(m_measured);
+
+    Point3f estPos(
+        m_state.at<float>(0),
+        m_state.at<float>(1),
+        m_state.at<float>(2)
+    );
+
+    m_lastTime = timeStamp;
+    return estPos;
+}
+
+Point3f KalmanTracker::getEstimatedPosition() const {
+    if (!m_initialized) return cv::Point3f(0,0,0);
+    return cv::Point3f(
+        m_kf.statePost.at<float>(0),
+        m_kf.statePost.at<float>(1),
+        m_kf.statePost.at<float>(2)
+    );
+}
