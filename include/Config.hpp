@@ -41,6 +41,14 @@ struct ArmorConfig{
     float w_h_ratio = 1.1;          // 装甲板宽高比
 };
 
+struct Ballistic{
+    float bulletSpeed = 28.0f;      // 弹速
+    float gravity = 9.8f;           // 重力加速度
+    float cameraOffsetX = 0.0f;     // 偏移X
+    float cameraOffsetY = 0.0f;     // 偏移Y
+    float cameraOffsetZ = 0.0f;     // 偏移Z
+};
+
 class Config{
 public:
     //获取单例实例
@@ -55,6 +63,7 @@ public:
     SerialConfig serial;
     PreProcessConfig preprocess;
     ArmorConfig armor;
+    Ballistic ballistic;
 
 private:
     Config();

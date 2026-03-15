@@ -23,6 +23,13 @@ armor:
   max_angle_diff: 30.0    # 最大角度差
   w_h_ratio: 1.1          # 装甲板宽高比
 
+ballistic:
+  bullet_speed: 28.0      # 弹速
+  gravity: 9.8            # 重力加速度
+  camera_offset_x: 0      # 偏移X
+  camera_offset_y: -50    # 偏移Y
+  camera_offset_z: 100    # 偏移Z
+
 serial:
   port: "/dev/tyUSB0"     # 串口名
   baud: 115200            # 波特率

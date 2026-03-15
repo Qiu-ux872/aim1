@@ -22,18 +22,25 @@ struct Armor{
     float armor_angle;          // 装甲板角度
     float armor_width;          // 装甲板宽度
     float armor_height;         // 装甲板高度
-    float yaw;                  // 装甲板yaw轴
-    float pitch;                // 装甲板pitch轴
 };
 
-struct PnPResult{
-    Point3f position;           // 平移向量（x, y, z）单位：mm
-    Mat rvec;                   // 旋转向量(3x1)
-    Mat rMatrix;                // 旋转矩阵(3x3)
-    Mat tvec;                   // 平移矩阵(3x1)
-    double distance;            // 距离(单位：mm)
-    float yaw;                  // yaw轴(rad)
-    float pitch;                // pitch轴(rad)
-    float roll;                 // roll轴(rad)
-    bool isValid;               // 解算是否有效
+struct PnPResult {
+    Point3f position;          // 平移向量 (x, y, z) 单位：毫米
+    Mat rotationVec;           // 旋转向量 (3x1)
+    Mat rotationMatrix;        // 旋转矩阵 (3x3)
+    Mat translationVec;        // 平移矩阵 (3x1)
+    double distance;               // 距离（毫米）
+    double yaw;                    // yaw（弧度）
+    double pitch;                  // pitch（弧度）
+    double roll;                   // roll（弧度）
+    bool isValid;                  // 是否有效
+    double reprojectionError;      // 重投影误差
+};
+
+// 瞄准角度
+struct AimAngle {
+    float yaw;                     // 水平转角（弧度）
+    float pitch;                   // 俯仰角（弧度）
+    float distance;                // 距离（米）
+    float flyTime;                 // 飞行时间（秒）
 };

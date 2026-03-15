@@ -1,41 +1,45 @@
-#pragma once
+#ifndef PNP_SOLVER_HPP
+#define PNP_SOLVER_HPP
 
-#include "Param.hpp"
 #include <opencv2/opencv.hpp>
-#include <iostream>
+#include <string>
 #include <vector>
-#include "PreProcess.hpp"
+#include "Param.hpp"
+#include "Config.hpp"
 
-using namespace std;
 using namespace cv;
+using namespace std;
 
-class ArmorModel{
+class PnPSolver {
 public:
-    static constexpr float ARMOR_HEIGHT = 125.0f;    // 装甲板高度（单位：mm）
-    static constexpr float ARMOR_WIDTH = 135.0f;     // 装甲板宽度（单位：mm）
+    PnPSolver();
+    // 从 calibration.yml 加载相机参数
+    bool loadCameraParams(const string& filename = "config/calibration.yml");
+    // 直接设置相机参数
+    void setCameraParams(const Mat& cameraMat, const Mat& distMat);
+    // 对装甲板进行 PnP 解算
+    PnPResult solveArmorPnP(const Armor& armor);
+    // 对四个图像点进行 PnP 解算
+    PnPResult solvePnP(const vector<Point2f>& imagePoints);
 
-    static vector<Point3f> getArmorPoints(){
-        vector<Point3f> points;
-        float w = ARMOR_WIDTH  / 2.0f;
-        float h = ARMOR_HEIGHT / 2.0f;
-
-        //顺序：左上，右上，右下，左下
-        points.emplace_back(-w,  h, 0);//左上
-        points.emplace_back( w,  h, 0);//右上
-        points.emplace_back( w, -h, 0);//右下
-        points.emplace_back(-w, -h, 0);//左下
-
-        return points;
-    }
-    // 为了兼容原有代码，保留这个接口但忽略armorType参数
-    static std::vector<cv::Point3f> getPointsByType(int armorType = 0) {
-        return getArmorPoints();
-    }
+private:
+    Mat cameraMatrix;
+    Mat distCoeffs;
+    vector<Point3f> armorPoints;  // 小装甲板三维点
+    void calculateEulerAngles(PnPResult& result);
 };
 
-class PnPSolver{
+// 角度解算器（含重力补偿）
+class AngleSolver {
 public:
-    PnPSolver(){
-        
-    }
+    AngleSolver();
+    AimAngle calculateAimAngle(const PnPResult& pnpResult);
+
+private:
+    float bulletSpeed;
+    float gravity;
+    Point3f cameraOffset;  // 相机相对于枪口的偏移（毫米）
+    float solvePitch(float dz, float dy, float v, float g);
 };
+
+#endif

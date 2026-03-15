@@ -38,6 +38,12 @@ void Config::loadYaml(const string& file_name){
         armor.max_angle_diff = node["armor"]["max_angle_diff"].as<float>();
         armor.w_h_ratio = node["armor"]["w_h_ratio"].as<float>();
 
+        ballistic.bulletSpeed = node["Ballistic"]["bulletSpeed"].as<float>();
+        ballistic.gravity = node["Ballistic"]["gravity"].as<float>();
+        ballistic.cameraOffsetX = node["Ballistic"]["cameraOffsetX"].as<float>();
+        ballistic.cameraOffsetY = node["Ballistic"]["cameraOffsetY"].as<float>();
+        ballistic.cameraOffsetZ = node["Ballistic"]["cameraOffsetZ"].as<float>();
+
     } catch (const YAML::Exception& e) {
         cerr << "[Config] Yaml文件加载错误:" << e.what() << endl;
     }
