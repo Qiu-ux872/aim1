@@ -45,6 +45,12 @@ void Config::loadYaml(const string& file_name){
         ballistic.cameraOffsetY = node["Ballistic"]["cameraOffsetY"].as<float>();
         ballistic.cameraOffsetZ = node["Ballistic"]["cameraOffsetZ"].as<float>();
 
+        kalman.processNoisePos = node["kalman"]["processNoisePos"].as<float>();
+        kalman.processNoiseVel = node["kalman"]["processNoiseVel"].as<float>();
+        kalman.measurementNoisePos = node["kalman"]["measurementNoisePos"].as<float>();
+        kalman.initialErrorCov = node["kalman"]["initialErrorCov"].as<float>();
+        kalman.angularVelocity = node["kalman"]["angularVelocity"].as<float>();
+
     } catch (const YAML::Exception& e) {
         cerr << "[Config] Yaml文件加载错误:" << e.what() << endl;
     }

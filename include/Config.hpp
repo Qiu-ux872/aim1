@@ -50,6 +50,14 @@ struct Ballistic{
     float cameraOffsetZ = 0.0f;     // 偏移Z
 };
 
+struct KalmanConfig{
+    float processNoisePos = 1e-4f;   // 位置过程噪声
+    float processNoiseVel = 1e-2f;    // 速度过程噪声
+    float measurementNoisePos = 1e-2f; // 观测噪声
+    float initialErrorCov = 1.0f;      // 初始误差协方差
+    float angularVelocity = 7.33f;     // 水平转速 (rad/s)，用于参考
+};
+
 class Config{
 public:
     //获取单例实例
@@ -65,6 +73,7 @@ public:
     PreProcessConfig preprocess;
     ArmorConfig armor;
     Ballistic ballistic;
+    KalmanConfig kalman;
 
 private:
     Config();

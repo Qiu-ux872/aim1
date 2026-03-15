@@ -31,6 +31,13 @@ ballistic:
   camera_offset_y: -50    # 偏移Y
   camera_offset_z: 100    # 偏移Z
 
+kalman:
+  processNoisePos: 0.0001      # 位置过程噪声
+  processNoiseVel: 0.01         # 速度过程噪声
+  measurementNoisePos: 0.01     # 观测噪声
+  initialErrorCov: 1.0          # 初始误差协方差
+  angularVelocity: 7.33         # 水平转速 (rad/s)
+
 serial:
   port: "/dev/tyUSB0"     # 串口名
   baud: 115200            # 波特率
