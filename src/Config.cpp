@@ -29,6 +29,7 @@ void Config::loadYaml(const string& file_name){
         preprocess.min_ratio = node["preprocess"]["min_ratio"].as<float>();
         preprocess.max_ratio = node["preprocess"]["max_ratio"].as<float>();
         preprocess.max_angle = node["preprocess"]["max_angle"].as<float>();
+        preprocess.morph_k_size = node["preprocess"]["morph_k_size"].as<int>();
 
         serial.port = node["serial"]["port"].as<string>();
         serial.baud = node["serial"]["baud"].as<int>();

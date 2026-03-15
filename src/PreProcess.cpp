@@ -54,6 +54,9 @@ Mat PreProcess::process(const Mat& frame){
     gray.convertTo(binary, CV_8U, c.preprocess.rdc_exposure_x, c.preprocess.rdc_exposure_y);
     // OTSU二值化
     threshold(binary, binary, 0, 255, THRESH_BINARY | THRESH_OTSU);
+    // 形态学操作
+    Mat kernel = getStructuringElement(MORPH_RECT, Size(c.preprocess.morph_k_size, c.preprocess.morph_k_size));
+    morphologyEx(binary, binary, MORPH_CLOSE, kernel);
 
     imshow("binary", binary);
     return binary;
@@ -127,7 +130,7 @@ vector<Armor> PreProcess::detectArmors(const vector<LightBar>& detected_bars){
     Config& c = Config::get();
     vector<Armor> armors;
     if(detected_bars.size() < 2){
-        cerr << "[预处理] 识别到的灯条不足2" << endl;
+        cerr << "[预处理] 识别到的灯条不足2,共识别到：" << detected_bars.size() << "根" << endl;
         return armors;
     }
 

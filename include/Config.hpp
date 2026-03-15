@@ -32,6 +32,7 @@ struct PreProcessConfig{
     float min_ratio = 2.0;
     float max_ratio = 4.0;
     float max_angle = 25.0;
+    float morph_k_size = 3;
 };
 
 struct ArmorConfig{

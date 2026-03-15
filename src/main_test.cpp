@@ -61,7 +61,7 @@ int main() {
     loadCameraMatrix("config/calibration.yml", cameraMatrix);
 
     // 3. 打开视频文件（请根据实际文件名修改路径）
-    string videoPath = "data/blue.mp4";  // 请替换为您的视频文件名
+    string videoPath = "data/red.mp4";  // 请替换为您的视频文件名
     VideoCapture cap(videoPath);
     if (!cap.isOpened()) {
         cerr << "无法打开视频文件: " << videoPath << endl;
