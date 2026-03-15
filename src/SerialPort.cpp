@@ -9,39 +9,36 @@
 using namespace std;
 using namespace cv;
 
-SerialPort::SerialPort() : m_fd(-1){
-    // 读取串口配置
+SerialPort::SerialPort() : m_fd(-1) {
     const auto& cfg = Config::get().serial;
     m_port = cfg.port;
     m_baudrate = cfg.baud;
 }
 
-SerialPort::~SerialPort(){
+SerialPort::~SerialPort() {
     close();
 }
 
-bool SerialPort::open(){
-    if(m_fd != -1){
+bool SerialPort::open() {
+    if (m_fd != -1) {
         cout << "串口已打开" << endl;
         return true;
     }
 
     m_fd = ::open(m_port.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
-    if(m_fd == -1){
+    if (m_fd == -1) {
         cerr << "无法打开串口: " << m_port << endl;
         return false;
     }
 
-    // 获取当前串口属性
     struct termios options;
     if (tcgetattr(m_fd, &options) != 0) {
         cerr << "获取串口属性失败" << endl;
         close();
         return false;
     }
-    
-    // 设置波特率
-    int baudrate = Config::get().serial.baud;
+
+    int baudrate = m_baudrate;
     speed_t speed;
     switch (baudrate) {
         case 9600:   speed = B9600;   break;
@@ -59,10 +56,10 @@ bool SerialPort::open(){
     cfsetispeed(&options, speed);
     cfsetospeed(&options, speed);
 
-    options.c_cflag &= ~PARENB;   // 无校验
-    options.c_cflag &= ~CSTOPB;   // 1位停止位
+    options.c_cflag &= ~PARENB;
+    options.c_cflag &= ~CSTOPB;
     options.c_cflag &= ~CSIZE;
-    options.c_cflag |= CS8;       // 8位数据
+    options.c_cflag |= CS8;
     options.c_cflag |= CREAD | CLOCAL;
 
     options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
@@ -82,5 +79,50 @@ bool SerialPort::open(){
     }
 
     cout << "串口 " << m_port << " 打开成功，波特率 " << baudrate << endl;
+    return true;
+}
+
+void SerialPort::close() {
+    if (m_fd != -1) {
+        ::close(m_fd);
+        m_fd = -1;
+        cout << "串口已关闭" << endl;
+    }
+}
+
+uint8_t SerialPort::calcChecksum(const uint8_t* data, size_t len) const {
+    uint8_t sum = 0;
+    for (size_t i = 0; i < len; i++) {
+        sum ^= data[i];
+    }
+    return sum;
+}
+
+bool SerialPort::sendAimAngle(const AimAngle& aim) {
+    if (m_fd == -1) {
+        cerr << "串口未打开" << endl;
+        return false;
+    }
+
+    uint8_t buffer[10];
+    buffer[0] = 0xAA;
+    memcpy(buffer + 1, &aim.yaw, 4);
+    memcpy(buffer + 5, &aim.pitch, 4);
+    buffer[9] = calcChecksum(buffer, 9);
+
+    ssize_t written = write(m_fd, buffer, sizeof(buffer));
+    if (written != sizeof(buffer)) {
+        cerr << "串口写入失败，实际写入 " << written << " 字节" << endl;
+        return false;
+    }
+    tcdrain(m_fd);
+    return true;
+}
+
+bool SerialPort::sendData(const uint8_t* data, size_t len) {
+    if (m_fd == -1) return false;
+    ssize_t written = write(m_fd, data, len);
+    if (written != (ssize_t)len) return false;
+    tcdrain(m_fd);
     return true;
 }

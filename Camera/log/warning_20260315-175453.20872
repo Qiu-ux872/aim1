@@ -1,0 +1,5 @@
+Log file created at: 2026/03/15 17:54:53
+Running on machine: qiu-WUJIE15XA
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+W0315 17:54:53.142467 20877 MVCameraBase.cpp:100] Device:(name:MV-SUA134GC#0 sn:049010410190)Lost
+W0315 17:54:56.715296 20877 MVCameraBase.cpp:120] Device:(name:MV-SUA134GC#0 sn:049010410190)ReConnected, TolCount:1

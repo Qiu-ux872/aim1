@@ -7,7 +7,7 @@ Config& Config::get(){
 }
 
 Config::Config(){
-    loadYaml("/config/Config.yaml");
+    loadYaml("config/Config.yaml");
 }
 
 void Config::loadYaml(const string& file_name){

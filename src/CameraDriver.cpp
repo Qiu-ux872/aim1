@@ -89,6 +89,8 @@ bool CameraDriver::open(){
         printError(status, "设置分辨率失败");
         // 继续，可能当前分辨率有效
     }
+    // 设置为连续采集模式（0 通常表示连续）
+    CameraSetTriggerMode(m_hCamera, 0);
 
     // 设置曝光参数
     float exposureUs = cfg.camera.exposure;
@@ -154,7 +156,7 @@ unsigned char* CameraDriver::captureRaw(int& width, int& height, int timeouMs){
 
     INT w, h;
     unsigned char* pBuffer = CameraGetImageBufferEx(m_hCamera, &w, &h, timeouMs);
-    if(pBuffer = nullptr){
+    if(pBuffer == nullptr){
         cerr << "获取图像超时(" << timeouMs << "ms)" << endl;
         return nullptr;
     }
@@ -169,7 +171,8 @@ Mat CameraDriver::capture(int timeoutMs){
     if(data == nullptr){
         return Mat();
     }
-    Mat image(w, h, CV_8UC3);
+
+    Mat image(h, w, CV_8UC3);
     memcpy(image.data, data, w * h * 3);
     return image;
 }
@@ -190,6 +193,15 @@ bool CameraDriver::setAutoExposure(bool enable) {
     CameraSdkStatus status = CameraSetAeState(m_hCamera, enable ? TRUE : FALSE);
     if (status != CAMERA_STATUS_SUCCESS) {
         printError(status, enable ? "开启自动曝光失败" : "关闭自动曝光失败");
+        return false;
+    }
+    return true;
+}
+bool CameraDriver::setExposureTime(float exposureUs) {
+    if (!m_isOpen) return false;
+    CameraSdkStatus status = CameraSetExposureTime(m_hCamera, exposureUs);
+    if (status != CAMERA_STATUS_SUCCESS) {
+        printError(status, "设置曝光时间失败");
         return false;
     }
     return true;

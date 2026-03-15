@@ -4,16 +4,17 @@
 #include <opencv2/opencv.hpp>
 
 #include "Config.hpp"
-#include "CameraDriver.hpp"
 #include "PreProcess.hpp"
 #include "PnPSolver.hpp"
 #include "KalmanTracker.hpp"
 #include "SerialPort.hpp"
 
+// 注意：不再需要 CameraDriver.hpp
+
 using namespace std;
 using namespace cv;
 
-// 获取当前时间戳（s）
+// 获取当前时间戳（s）——用于卡尔曼滤波，视频调试时可基于帧计数模拟时间
 double getCurrentTimeSec() {
     auto now = chrono::steady_clock::now();
     return chrono::duration<double>(now.time_since_epoch()).count();
@@ -59,18 +60,16 @@ int main() {
     Mat cameraMatrix;
     loadCameraMatrix("config/calibration.yml", cameraMatrix);
 
-    // 3. 初始化相机
-    CameraDriver camera;
-    if (!camera.open()) {
-        cerr << "相机打开失败" << endl;
+    // 3. 打开视频文件（请根据实际文件名修改路径）
+    string videoPath = "data/blue.mp4";  // 请替换为您的视频文件名
+    VideoCapture cap(videoPath);
+    if (!cap.isOpened()) {
+        cerr << "无法打开视频文件: " << videoPath << endl;
         return -1;
     }
-    if (!camera.start()) {
-        cerr << "相机启动失败" << endl;
-        return -1;
-    }
+    cout << "视频文件打开成功" << endl;
 
-    // 4. 初始化 PnP 解算器（其内部会再次加载相机参数用于解算）
+    // 4. 初始化 PnP 解算器（其内部会加载相机参数用于解算）
     PnPSolver pnpSolver;
     if (!pnpSolver.loadCameraParams("config/calibration.yml")) {
         cerr << "警告：PnP解算器使用默认相机内参" << endl;
@@ -80,7 +79,7 @@ int main() {
     KalmanTracker tracker;
     AngleSolver angleSolver;   // 构造函数已从 Config 读取弹道参数
 
-    // 6. 初始化串口
+    // 6. 初始化串口（如需发送角度）
     SerialPort serial;
     if (!serial.open()) {
         cerr << "串口打开失败，将无法发送角度" << endl;
@@ -91,13 +90,14 @@ int main() {
 
     // 8. 主循环
     while (true) {
-        double timeStamp = getCurrentTimeSec();
+        double timeStamp = getCurrentTimeSec();  // 实际时间，若需要固定帧率可改用帧计数
 
-        // 捕获一帧图像
-        Mat frame = camera.capture(1000);
+        // 从视频读取一帧
+        Mat frame;
+        cap >> frame;
         if (frame.empty()) {
-            cerr << "捕获图像超时，继续等待..." << endl;
-            continue;
+            cout << "视频播放完毕，退出循环" << endl;
+            break;
         }
 
         // 预处理：获得二值图
@@ -161,7 +161,7 @@ int main() {
             aim = angleSolver.calculateAimAngle(dummy);
         }
 
-        // 通过串口发送瞄准角度（如果串口已打开）
+        // 通过串口发送瞄准角度
         if (serial.isOpen() && tracker.isInitialized()) {
             if (!serial.sendAimAngle(aim)) {
                 cerr << "串口发送失败" << endl;
@@ -185,13 +185,12 @@ int main() {
 
         // 显示图像
         imshow("Armor Tracking", frame);
-        char key = waitKey(1);
+        char key = waitKey(50);  // 等待1ms，若需要按帧率播放可适当增加
         if (key == 'q' || key == 'Q') break;
     }
 
     // 9. 清理资源
-    camera.stop();
-    camera.close();
+    cap.release();
     serial.close();
     destroyAllWindows();
 

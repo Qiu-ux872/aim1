@@ -55,6 +55,7 @@ Mat PreProcess::process(const Mat& frame){
     // OTSU二值化
     threshold(binary, binary, 0, 255, THRESH_BINARY | THRESH_OTSU);
 
+    imshow("binary", binary);
     return binary;
 }
 
