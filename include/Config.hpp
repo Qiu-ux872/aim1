@@ -13,7 +13,8 @@ struct CameraConfig{
     int width = 640;
     int height = 480;
     int fps = 30;
-    int exposure = 1000;
+    float exposure = 1000.0;
+    float gain = 10.0;
 };
 
 struct SerialConfig{

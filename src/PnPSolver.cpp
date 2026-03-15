@@ -29,7 +29,7 @@ bool PnPSolver::loadCameraParams(const string& filename) {
 
     Mat tmpCam, tmpDist;
     // 尝试多种键名读取相机矩阵
-    vector<string> camKeys = {"camera_matrix", "cameraMatrix", "K"};
+    vector<string> camKeys = {"camera_matrix", "cameraMatrix"};
     for (const auto& key : camKeys) {
         fs[key] >> tmpCam;
         if (!tmpCam.empty()) break;
@@ -47,7 +47,7 @@ bool PnPSolver::loadCameraParams(const string& filename) {
     }
 
     // 尝试多种键名读取畸变系数
-    vector<string> distKeys = {"distortion_coefficients", "distCoeffs", "D"};
+    vector<string> distKeys = {"dist_coeffs", "distCoeffs"};
     for (const auto& key : distKeys) {
         fs[key] >> tmpDist;
         if (!tmpDist.empty()) break;
@@ -153,7 +153,7 @@ AngleSolver::AngleSolver() {
     // 从全局配置读取重力补偿参数（需确保 Config 中已添加以下成员）
     const auto& config = Config::get();
     bulletSpeed = config.ballistic.bulletSpeed;               // 弹速 (m/s)
-    gravity = config.ballistic.gravity;                       // 重力加速度 (m/s²)
+    gravity = config.ballistic.gravity;                       // 重力加速度 (m/s^2)
     cameraOffset = Point3f(config.ballistic.cameraOffsetX,    // 偏移 X (mm)
                            config.ballistic.cameraOffsetY,    // 偏移 Y (mm)
                            config.ballistic.cameraOffsetZ);   // 偏移 Z (mm)
@@ -161,9 +161,9 @@ AngleSolver::AngleSolver() {
 
 AimAngle AngleSolver::calculateAimAngle(const PnPResult& pnpResult) {
     AimAngle aim;
-    aim.distance = static_cast<float>(pnpResult.distance / 1000.0); // 毫米转米
+    aim.distance = static_cast<float>(pnpResult.distance / 1000.0); // mm->m
 
-    // 目标在相机坐标系下的位置（毫米）
+    // 目标在相机坐标系下的位置（mm）
     Point3f targetCam = pnpResult.position;
     // 转换到枪口坐标系（考虑相机偏移）
     Point3f targetGimbal(
@@ -172,8 +172,8 @@ AimAngle AngleSolver::calculateAimAngle(const PnPResult& pnpResult) {
         targetCam.z - cameraOffset.z
     );
 
-    float dz = targetGimbal.z / 1000.0f; // 前向距离（米）
-    float dy = targetGimbal.y / 1000.0f; // 高度差（米），Y向下为正
+    float dz = targetGimbal.z / 1000.0f; // 前向距离（m）
+    float dy = targetGimbal.y / 1000.0f; // 高度差（m），Y向下为正
 
     // 水平转角
     aim.yaw = atan2(targetGimbal.x, targetGimbal.z);

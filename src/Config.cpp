@@ -17,7 +17,8 @@ void Config::loadYaml(const string& file_name){
         camera.width = node["camera"]["width"].as<int>();
         camera.height = node["camera"]["height"].as<int>();
         camera.fps = node["camera"]["fps"].as<int>();
-        camera.exposure = node["camera"]["exposure"].as<int>();
+        camera.exposure = node["camera"]["exposure"].as<float>();
+        camera.gain = node["camera"]["gain"].as<float>();
 
         preprocess.gaussian_k_size = node["preprocess"]["gaussian_k_size"].as<int>();
         preprocess.gaussian_sigma = node["preprocess"]["gaussian_sigma"].as<float>();

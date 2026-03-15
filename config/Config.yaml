@@ -1,9 +1,10 @@
 ---
 camera:
   width: 640
-  height: 480pre
+  height: 480
   fps: 30
-  exposure: 1000
+  exposure: 1000.0
+  gain: 10.0
 
 preprocess:
   gaussian_k_size: 3      # 高斯模糊核大小
