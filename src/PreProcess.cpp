@@ -1,42 +1,39 @@
 #include "PreProcess.hpp"
 #include "Config.hpp"
 
-// 排列角点
+// 排列角点 - 基于坐标对比（按 y 排序再按 x 排序）
 vector<Point2f> sortCorners(const RotatedRect& rect) {
     Point2f corners[4];
     rect.points(corners);
     
-    // 获取矩形的尺寸和角度
-    Size2f size = rect.size;
-    float width = min(size.width, size.height);   // 短边
-    float length = max(size.width, size.height);  // 长边
-    float angle = rect.angle;  // 长轴与水平线夹角
+    // 将四个点放入 vector
+    vector<Point2f> pts(corners, corners + 4);
     
-    // 根据角度确定矩形的方向向量
-    float cosA = cos(angle * CV_PI / 180);
-    float sinA = sin(angle * CV_PI / 180);
+    // 按 y 坐标升序排序，如果 y 相同则按 x 升序
+    sort(pts.begin(), pts.end(), [](const Point2f& a, const Point2f& b) {
+        if (a.y != b.y) return a.y < b.y;
+        return a.x < b.x;
+    });
     
-    // 计算四个角点相对于中心的偏移
-    Point2f center = rect.center;
-    Point2f halfLength(0, length/2);
-    Point2f halfWidth(width/2, 0);
+    // 前两个点为上排（y 较小），后两个点为下排（y 较大）
+    vector<Point2f> top = {pts[0], pts[1]};
+    vector<Point2f> bottom = {pts[2], pts[3]};
     
-    // 旋转偏移量
-    Point2f offset1 = Point2f(
-        halfLength.x * cosA - halfLength.y * sinA,
-        halfLength.x * sinA + halfLength.y * cosA
-    );
-    Point2f offset2 = Point2f(
-        halfWidth.x * cosA - halfWidth.y * sinA,
-        halfWidth.x * sinA + halfWidth.y * cosA
-    );
+    // 在上排中按 x 排序（左到右）
+    sort(top.begin(), top.end(), [](const Point2f& a, const Point2f& b) {
+        return a.x < b.x;
+    });
+    // 在下排中按 x 排序
+    sort(bottom.begin(), bottom.end(), [](const Point2f& a, const Point2f& b) {
+        return a.x < b.x;
+    });
     
-    // 计算四个角点（左上、右上、右下、左下）
+    // 组装结果：左上、右上、右下、左下
     vector<Point2f> sorted(4);
-    sorted[0] = center - offset1 - offset2;  // 左上
-    sorted[1] = center - offset1 + offset2;  // 右上
-    sorted[2] = center + offset1 + offset2;  // 右下
-    sorted[3] = center + offset1 - offset2;  // 左下
+    sorted[0] = top[0];    // 左上
+    sorted[1] = top[1];    // 右上
+    sorted[2] = bottom[1]; // 右下
+    sorted[3] = bottom[0]; // 左下
     
     return sorted;
 }
@@ -46,14 +43,25 @@ Mat PreProcess::process(const Mat& frame){
     // 转灰度
     Mat gray;
     cvtColor(frame, gray, COLOR_BGR2GRAY);
+
     // 高斯模糊
     Mat blur;
     GaussianBlur(gray, blur, Size(c.preprocess.gaussian_k_size, c.preprocess.gaussian_k_size), c.preprocess.gaussian_sigma);
-    // 降曝光
-    Mat binary;
-    gray.convertTo(binary, CV_8U, c.preprocess.rdc_exposure_x, c.preprocess.rdc_exposure_y);
+
+    // 降曝光（可选，注释掉测试不降曝光的效果）
+    Mat contrast;
+    blur.convertTo(contrast, CV_8U, c.preprocess.rdc_exposure_x, c.preprocess.rdc_exposure_y);
+
     // OTSU二值化
-    threshold(binary, binary, 0, 255, THRESH_BINARY | THRESH_OTSU);
+    Mat binary;
+    double otsu_thresh = threshold(contrast, binary, 0, 255, THRESH_BINARY | THRESH_OTSU);
+
+    // 输出OTSU阈值（每30帧输出一次）
+    static int frame_count = 0;
+    if(++frame_count % 30 == 0) {
+        cout << "[预处理] OTSU阈值: " << otsu_thresh << endl;
+    }
+
     // 形态学操作
     Mat kernel = getStructuringElement(MORPH_RECT, Size(c.preprocess.morph_k_size, c.preprocess.morph_k_size));
     morphologyEx(binary, binary, MORPH_CLOSE, kernel);
@@ -72,10 +80,17 @@ vector<LightBar> PreProcess::detectLightBars(const Mat& binary){
 
     // 筛选灯条
     vector<LightBar> detected_bars;
+    int filtered_area = 0, filtered_ratio = 0, filtered_angle = 0, total = 0;
+
     for(auto& contour : contours){
+        total++;
+
         // 面积筛选
         double area = contourArea(contour);
-        if(area < c.preprocess.min_area || area > c.preprocess.max_area) continue;
+        if(area < c.preprocess.min_area || area > c.preprocess.max_area) {
+            filtered_area++;
+            continue;
+        }
 
         // 最小外接矩形
         RotatedRect rect = minAreaRect(contour);
@@ -92,15 +107,21 @@ vector<LightBar> PreProcess::detectLightBars(const Mat& binary){
         }
         float angle = rect.angle;
         // 宽高比
-        if(ratio < c.preprocess.min_ratio || ratio > c.preprocess.max_ratio) continue;
+        if(ratio < c.preprocess.min_ratio || ratio > c.preprocess.max_ratio) {
+            filtered_ratio++;
+            continue;
+        }
         // 偏转角
-        if(abs(angle) < 90 - c.preprocess.max_angle) continue;
-        // 矩形度
-        vector<Point> hull;
-        convexHull(contour, hull);
-        double hullArea = contourArea(hull);
-        double rect_rate = area / hullArea;
-        if(rect_rate < c.preprocess.min_rect_rate || rect_rate > c.preprocess.max_rect_rate) continue;
+        if(abs(angle) < 90 - c.preprocess.max_angle) {
+            filtered_angle++;
+            continue;
+        }
+        // // 矩形度
+        // vector<Point> hull;
+        // convexHull(contour, hull);
+        // double hullArea = contourArea(hull);
+        // double rect_rate = area / hullArea;
+        // if(rect_rate < c.preprocess.min_rect_rate || rect_rate > c.preprocess.max_rect_rate) continue;
 
         //排列角点
         LightBar light;
@@ -114,6 +135,17 @@ vector<LightBar> PreProcess::detectLightBars(const Mat& binary){
 
         detected_bars.push_back(light);
     }
+
+    // 输出筛选统计信息（每10帧输出一次，避免刷屏）
+    static int frame_count = 0;
+    if(++frame_count % 10 == 0) {
+        cout << "[灯条筛选] 总轮廓:" << total
+             << " 面积过滤:" << filtered_area
+             << " 宽高比过滤:" << filtered_ratio
+             << " 角度过滤:" << filtered_angle
+             << " 保留:" << detected_bars.size() << endl;
+    }
+
     return detected_bars;
 }
 
@@ -154,13 +186,15 @@ vector<Armor> PreProcess::detectArmors(const vector<LightBar>& detected_bars){
 
             // 计算中心点距离和比例
             float center_dist = norm(left.bar_center - right.bar_center);
+            // 中心距离过滤
+            if(center_dist < c.armor.min_center_dist || center_dist > c.armor.max_center_dist) continue;
             float dist_ratio = center_dist / height_avg;
             if(dist_ratio < c.armor.min_dist_ratio || dist_ratio > c.armor.max_dist_ratio) continue;
 
             // 计算两灯条中心连线角度
             float connect_angle = atan2(
                 right.bar_center.y - left.bar_center.y,
-                right.bar_center.x - right.bar_center.x
+                right.bar_center.x - left.bar_center.x
             ) * 180 / CV_PI;
 
             // 连线角度与灯条角度过滤

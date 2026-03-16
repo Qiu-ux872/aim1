@@ -17,12 +17,25 @@ void drawLightBar(const vector<LightBar>& detected_bars, Mat& frame){
     for(const auto& bar : detected_bars){
         // 绘制灯条中心（红色圆点）
         circle(frame, bar.bar_center, 5, Scalar(0, 0, 255), -1);
-        // 绘制灯条方向（绿色线段）
-        float angle_rad = bar.bar_angle * CV_PI / 180.0f;
-        Point2f dir(cos(angle_rad), sin(angle_rad));
-        Point2f start = bar.bar_center - dir * (bar.bar_length / 2.0f);
-        Point2f end = bar.bar_center + dir * (bar.bar_length / 2.0f);
-        line(frame, start, end, Scalar(0, 255, 0), 2);
+        
+        // // 绘制灯条方向（绿色线段）
+        // float angle_rad = bar.bar_angle * CV_PI / 180.0f;
+        // Point2f dir(cos(angle_rad), sin(angle_rad));
+        // Point2f start = bar.bar_center - dir * (bar.bar_length / 2.0f);
+        // Point2f end = bar.bar_center + dir * (bar.bar_length / 2.0f);
+        // line(frame, start, end, Scalar(0, 255, 0), 2);
+        
+        // ===== 新增：绘制外接矩形 =====
+        // 1. 绘制旋转矩形（最小外接矩形）
+        // 需要从 bar 中获取四个角点（bar_pts）
+        const auto& pts = bar.bar_pts;
+        for (int i = 0; i < 4; i++) {
+            line(frame, pts[i], pts[(i+1)%4], Scalar(0, 255, 0), 2); // 蓝色线条
+        }
+        
+        // 2. 或者绘制轴对齐矩形（可选）
+        // Rect rect = boundingRect(pts); // 使用 bar_pts 或整个轮廓
+        // rectangle(frame, rect, Scalar(0, 255, 255), 1); // 黄色
     }
 }
 
@@ -182,20 +195,20 @@ int main() {
             }
         }
 
-        // 绘制卡尔曼滤波点（需要投影到图像平面）
-        if (tracker.isInitialized()) {
-            // 实测点（蓝色）
-            if (hasTarget) {
-                Point2f ptMeas = projectPoint(measuredPos, cameraMatrix);
-                circle(frame, ptMeas, 5, Scalar(255, 0, 0), -1);
-            }
-            // 估计点（绿色）
-            Point2f ptEst = projectPoint(estPos, cameraMatrix);
-            circle(frame, ptEst, 5, Scalar(0, 255, 0), -1);
-            // 预测点（红色）
-            Point2f ptPred = projectPoint(predPos, cameraMatrix);
-            circle(frame, ptPred, 5, Scalar(0, 0, 255), -1);
-        }
+        // // 绘制卡尔曼滤波点（需要投影到图像平面）
+        // if (tracker.isInitialized()) {
+        //     // 实测点（蓝色）
+        //     if (hasTarget) {
+        //         Point2f ptMeas = projectPoint(measuredPos, cameraMatrix);
+        //         circle(frame, ptMeas, 5, Scalar(255, 0, 0), -1);
+        //     }
+        //     // 估计点（绿色）
+        //     Point2f ptEst = projectPoint(estPos, cameraMatrix);
+        //     circle(frame, ptEst, 5, Scalar(0, 255, 0), -1);
+        //     // 预测点（红色）
+        //     Point2f ptPred = projectPoint(predPos, cameraMatrix);
+        //     circle(frame, ptPred, 5, Scalar(0, 0, 255), -1);
+        // }
 
         // 显示图像
         imshow("Armor Tracking", frame);
