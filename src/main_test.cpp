@@ -9,10 +9,22 @@
 #include "KalmanTracker.hpp"
 #include "SerialPort.hpp"
 
-// 注意：不再需要 CameraDriver.hpp
-
 using namespace std;
 using namespace cv;
+
+
+void drawLightBar(const vector<LightBar>& detected_bars, Mat& frame){
+    for(const auto& bar : detected_bars){
+        // 绘制灯条中心（红色圆点）
+        circle(frame, bar.bar_center, 5, Scalar(0, 0, 255), -1);
+        // 绘制灯条方向（绿色线段）
+        float angle_rad = bar.bar_angle * CV_PI / 180.0f;
+        Point2f dir(cos(angle_rad), sin(angle_rad));
+        Point2f start = bar.bar_center - dir * (bar.bar_length / 2.0f);
+        Point2f end = bar.bar_center + dir * (bar.bar_length / 2.0f);
+        line(frame, start, end, Scalar(0, 255, 0), 2);
+    }
+}
 
 // 获取当前时间戳（s）——用于卡尔曼滤波，视频调试时可基于帧计数模拟时间
 double getCurrentTimeSec() {
@@ -61,7 +73,7 @@ int main() {
     loadCameraMatrix("config/calibration.yml", cameraMatrix);
 
     // 3. 打开视频文件（请根据实际文件名修改路径）
-    string videoPath = "data/red.mp4";  // 请替换为您的视频文件名
+    string videoPath = "data/red1.mp4";  // 请替换为您的视频文件名
     VideoCapture cap(videoPath);
     if (!cap.isOpened()) {
         cerr << "无法打开视频文件: " << videoPath << endl;
@@ -105,6 +117,8 @@ int main() {
 
         // 检测灯条
         vector<LightBar> lightBars = PreProcess::detectLightBars(binary);
+
+        drawLightBar(lightBars, frame);
 
         // 匹配装甲板
         vector<Armor> armors = PreProcess::detectArmors(lightBars);
@@ -185,7 +199,7 @@ int main() {
 
         // 显示图像
         imshow("Armor Tracking", frame);
-        char key = waitKey(50);  // 等待1ms，若需要按帧率播放可适当增加
+        char key = waitKey(100);  // 等待1ms，若需要按帧率播放可适当增加
         if (key == 'q' || key == 'Q') break;
     }
 

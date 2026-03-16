@@ -30,6 +30,8 @@ void Config::loadYaml(const string& file_name){
         preprocess.max_ratio = node["preprocess"]["max_ratio"].as<float>();
         preprocess.max_angle = node["preprocess"]["max_angle"].as<float>();
         preprocess.morph_k_size = node["preprocess"]["morph_k_size"].as<int>();
+        preprocess.min_rect_rate = node["preprocess"]["min_rect_rate"].as<float>();
+        preprocess.max_rect_rate = node["preprocess"]["max_rect_rate"].as<float>();
 
         serial.port = node["serial"]["port"].as<string>();
         serial.baud = node["serial"]["baud"].as<int>();
@@ -38,6 +40,8 @@ void Config::loadYaml(const string& file_name){
         armor.min_dist_ratio = node["armor"]["min_dist_ratio"].as<float>();
         armor.max_dist_ratio = node["armor"]["max_dist_ratio"].as<float>();
         armor.max_angle_diff = node["armor"]["max_angle_diff"].as<float>();
+        armor.min_center_dist = node["armor"]["min_center_dist"].as<float>();
+        armor.max_center_dist = node["armor"]["max_center_dist"].as<float>();
         armor.w_h_ratio = node["armor"]["w_h_ratio"].as<float>();
 
         ballistic.bulletSpeed = node["Ballistic"]["bulletSpeed"].as<float>();

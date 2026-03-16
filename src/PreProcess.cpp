@@ -57,6 +57,7 @@ Mat PreProcess::process(const Mat& frame){
     // 形态学操作
     Mat kernel = getStructuringElement(MORPH_RECT, Size(c.preprocess.morph_k_size, c.preprocess.morph_k_size));
     morphologyEx(binary, binary, MORPH_CLOSE, kernel);
+    morphologyEx(binary, binary, MORPH_OPEN, kernel);
 
     imshow("binary", binary);
     return binary;
@@ -94,6 +95,12 @@ vector<LightBar> PreProcess::detectLightBars(const Mat& binary){
         if(ratio < c.preprocess.min_ratio || ratio > c.preprocess.max_ratio) continue;
         // 偏转角
         if(abs(angle) < 90 - c.preprocess.max_angle) continue;
+        // 矩形度
+        vector<Point> hull;
+        convexHull(contour, hull);
+        double hullArea = contourArea(hull);
+        double rect_rate = area / hullArea;
+        if(rect_rate < c.preprocess.min_rect_rate || rect_rate > c.preprocess.max_rect_rate) continue;
 
         //排列角点
         LightBar light;

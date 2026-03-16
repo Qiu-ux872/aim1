@@ -33,14 +33,18 @@ struct PreProcessConfig{
     float max_ratio = 4.0;
     float max_angle = 25.0;
     float morph_k_size = 3;
+    float min_rect_rate = 0.5;
+    float max_rect_rate = 1.0;
 };
 
 struct ArmorConfig{
     float max_height_diff = 3.0;    // 最大高度差
-    float min_dist_ratio = 1.2;     // 最小中心点距离和比
-    float max_dist_ratio = 4.5;     // 最大中心点距离和比
+    float min_dist_ratio = 1.5;     // 最小中心点距离比
+    float max_dist_ratio = 2.5;     // 最大中心点距离比
     float max_angle_diff = 30.0;    // 最大角度差
-    float w_h_ratio = 1.1;          // 装甲板宽高比
+    float w_h_ratio      = 1.1;     // 装甲板宽高比
+    float min_center_dist = 0.5;    // 最小中心点距离
+    float max_center_dist = 3.0;    // 最大中心点距离
 };
 
 struct Ballistic{
