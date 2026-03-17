@@ -220,7 +220,7 @@ int main() {
         // putText(frame, tvecText, Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.7, Scalar(255, 255, 255), 2);
         Config& c = Config::get();
         imshow("Armor Tracking", frame);
-        char key = waitKey(100);  // 等待1ms，若需要按帧率播放可适当增加
+        char key = waitKey(40);  // 等待1ms，若需要按帧率播放可适当增加
         if (key == 'q' || key == 'Q') break;
         
     }

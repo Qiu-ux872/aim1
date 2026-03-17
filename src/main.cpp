@@ -13,6 +13,21 @@
 using namespace std;
 using namespace cv;
 
+void drawArmor(const vector<Armor>& armors, Mat& frame){
+    for(const auto& armor : armors){
+        // 绘制灯条中心（红色圆点）
+        circle(frame, armor.armor_center, 5, Scalar(0, 0, 255), -1);
+        
+        // 将浮点角点转换为整数点
+        vector<Point> intPts;
+        for (const auto& pt : armor.armor_pts) {
+            intPts.push_back(Point(cvRound(pt.x), cvRound(pt.y)));
+        }
+        // 使用 polylines 绘制装甲板轮廓
+        polylines(frame, intPts, true, Scalar(0, 255, 0), 3);
+    }
+}
+
 // 获取当前时间戳（s）
 double getCurrentTimeSec() {
     auto now = chrono::steady_clock::now();
