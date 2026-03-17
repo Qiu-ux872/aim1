@@ -11,13 +11,7 @@ find_package(yaml-cpp REQUIRED)
 # 设置头文件目录
 include_directories(
     ${CMAKE_SOURCE_DIR}/include
-    ${OpenCV_INCLUDE_DIRS}cmake_minimum_required(VERSION 3.10)
-
-    project(aim)
-    
-    add_library(config Config.cpp)
-    target_link_libraries(config yaml-cpp)
-    ${YAML_CPP_INCLUDE_DIR}
+    ${OpenCV_INCLUDE_DIRS}
 )
 
 include_directories(${CMAKE_SOURCE_DIR}/MindVisionSdk)
@@ -28,7 +22,6 @@ set(SOURCES
     src/CameraDriver.cpp
     src/KalmanTracker.cpp
     src/PnPSolver.cpp
-# 添加 MindVision SDK 头文件路径（假设 SDK 头文件位于 MindVisionSdk 目录
     src/PreProcess.cpp
     src/SerialPort.cpp
     src/main_test.cpp

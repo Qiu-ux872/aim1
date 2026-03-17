@@ -50,6 +50,19 @@ Point2f projectPoint(const Point3f& pt, const Mat& cameraMatrix) {
     return pts2d[0];
 }
 
+void drawLightBar(const vector<LightBar>& detected_bars, Mat& frame){
+    for(const auto& bar : detected_bars){
+        // 绘制灯条中心（红色圆点）
+        circle(frame, bar.bar_center, 5, Scalar(0, 0, 255), -1);
+        
+        // 绘制旋转矩形
+        const auto& pts = bar.bar_pts;
+        for (int i = 0; i < 4; i++) {
+            line(frame, pts[i], pts[(i+1)%4], Scalar(0, 255, 0), 2); // 蓝色线条
+        }
+    }
+}
+
 int main() {
     // 1. 加载全局配置
     Config::get();
@@ -108,6 +121,8 @@ int main() {
 
         // 匹配装甲板
         vector<Armor> armors = PreProcess::detectArmors(lightBars);
+
+        drawLightBar(lightBars, frame);
 
         // 默认初始化为无效状态
         bool hasTarget = false;

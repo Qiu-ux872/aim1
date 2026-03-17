@@ -56,21 +56,21 @@ bool SerialPort::open() {
     cfsetispeed(&options, speed);
     cfsetospeed(&options, speed);
 
-    options.c_cflag &= ~PARENB;
-    options.c_cflag &= ~CSTOPB;
-    options.c_cflag &= ~CSIZE;
-    options.c_cflag |= CS8;
-    options.c_cflag |= CREAD | CLOCAL;
+    options.c_cflag &= ~PARENB;        // 无奇偶校验
+    options.c_cflag &= ~CSTOPB;        // 1位停止位
+    options.c_cflag &= ~CSIZE;         // 清除数据位设置
+    options.c_cflag |= CS8;            // 8位数据位
+    options.c_cflag |= CREAD | CLOCAL; // 启用接收器，忽略调制解调器控制线
 
-    options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
-    options.c_iflag &= ~(IXON | IXOFF | IXANY);
-    options.c_iflag &= ~(INLCR | ICRNL | IGNCR);
-    options.c_oflag &= ~OPOST;
+    options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG); // 原始模式，非规范输入，禁用回显
+    options.c_iflag &= ~(IXON | IXOFF | IXANY);        // 禁用软件流控
+    options.c_iflag &= ~(INLCR | ICRNL | IGNCR);       // 禁用输入转换
+    options.c_oflag &= ~OPOST;                           // 原始输出模式
 
-    options.c_cc[VMIN] = 0;
-    options.c_cc[VTIME] = 1;
+    options.c_cc[VMIN] = 0;   // 非阻塞读取，最少读取0个字符
+    options.c_cc[VTIME] = 1;   // 超时设置：0.1秒
 
-    tcflush(m_fd, TCIOFLUSH);
+    tcflush(m_fd, TCIOFLUSH);  // 清空输入输出缓冲区
 
     if (tcsetattr(m_fd, TCSANOW, &options) != 0) {
         cerr << "设置串口属性失败" << endl;
@@ -104,18 +104,22 @@ bool SerialPort::sendAimAngle(const AimAngle& aim) {
         return false;
     }
 
-    uint8_t buffer[10];
-    buffer[0] = 0xAA;
-    memcpy(buffer + 1, &aim.yaw, 4);
-    memcpy(buffer + 5, &aim.pitch, 4);
-    buffer[9] = calcChecksum(buffer, 9);
+    // 文本格式：yaw,pitch,distance,flyTime\n
+    char buffer[128];
+    int len = snprintf(buffer, sizeof(buffer), "%.4f,%.4f,%.4f,%.4f\n",
+                      aim.yaw, aim.pitch, aim.distance, aim.flyTime);
 
-    ssize_t written = write(m_fd, buffer, sizeof(buffer));
-    if (written != sizeof(buffer)) {
+    if (len <= 0 || len >= (int)sizeof(buffer)) {
+        cerr << "格式化数据失败" << endl;
+        return false;
+    }
+
+    ssize_t written = write(m_fd, buffer, len);
+    if (written != len) {
         cerr << "串口写入失败，实际写入 " << written << " 字节" << endl;
         return false;
     }
-    tcdrain(m_fd);
+    tcdrain(m_fd);  // 等待所有数据发送完成
     return true;
 }
 

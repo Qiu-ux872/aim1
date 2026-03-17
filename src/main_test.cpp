@@ -13,29 +13,18 @@ using namespace std;
 using namespace cv;
 
 
-void drawLightBar(const vector<LightBar>& detected_bars, Mat& frame){
-    for(const auto& bar : detected_bars){
+void drawArmor(const vector<Armor>& armors, Mat& frame){
+    for(const auto& armor : armors){
         // 绘制灯条中心（红色圆点）
-        circle(frame, bar.bar_center, 5, Scalar(0, 0, 255), -1);
+        circle(frame, armor.armor_center, 5, Scalar(0, 0, 255), -1);
         
-        // // 绘制灯条方向（绿色线段）
-        // float angle_rad = bar.bar_angle * CV_PI / 180.0f;
-        // Point2f dir(cos(angle_rad), sin(angle_rad));
-        // Point2f start = bar.bar_center - dir * (bar.bar_length / 2.0f);
-        // Point2f end = bar.bar_center + dir * (bar.bar_length / 2.0f);
-        // line(frame, start, end, Scalar(0, 255, 0), 2);
-        
-        // ===== 新增：绘制外接矩形 =====
-        // 1. 绘制旋转矩形（最小外接矩形）
-        // 需要从 bar 中获取四个角点（bar_pts）
-        const auto& pts = bar.bar_pts;
-        for (int i = 0; i < 4; i++) {
-            line(frame, pts[i], pts[(i+1)%4], Scalar(0, 255, 0), 2); // 蓝色线条
+        // 将浮点角点转换为整数点
+        vector<Point> intPts;
+        for (const auto& pt : armor.armor_pts) {
+            intPts.push_back(Point(cvRound(pt.x), cvRound(pt.y)));
         }
-        
-        // 2. 或者绘制轴对齐矩形（可选）
-        // Rect rect = boundingRect(pts); // 使用 bar_pts 或整个轮廓
-        // rectangle(frame, rect, Scalar(0, 255, 255), 1); // 黄色
+        // 使用 polylines 绘制装甲板轮廓
+        polylines(frame, intPts, true, Scalar(0, 255, 0), 3);
     }
 }
 
@@ -114,8 +103,20 @@ int main() {
     namedWindow("Armor Tracking", WINDOW_AUTOSIZE);
 
     // 8. 主循环
+    double lastTime = getCurrentTimeSec();
+    int frameCount = 0;
+    double fps = 0.0;
+
     while (true) {
-        double timeStamp = getCurrentTimeSec();  // 实际时间，若需要固定帧率可改用帧计数
+        double timeStamp = getCurrentTimeSec();
+        frameCount++;
+
+        // 每秒更新一次 fps 变量
+        if (timeStamp - lastTime >= 1.0) {
+            fps = frameCount / (timeStamp - lastTime);
+            frameCount = 0;
+            lastTime = timeStamp;
+        }
 
         // 从视频读取一帧
         Mat frame;
@@ -126,15 +127,16 @@ int main() {
         }
 
         // 预处理：获得二值图
-        Mat binary = PreProcess::process(frame);
+        Mat blur = PreProcess::process(frame);
 
         // 检测灯条
-        vector<LightBar> lightBars = PreProcess::detectLightBars(binary);
-
-        drawLightBar(lightBars, frame);
+        vector<LightBar> lightBars = PreProcess::detectLightBars(blur);
 
         // 匹配装甲板
         vector<Armor> armors = PreProcess::detectArmors(lightBars);
+
+        // 绘制装甲板
+        drawArmor(armors, frame);
 
         // 默认初始化为无效状态
         bool hasTarget = false;
@@ -211,9 +213,16 @@ int main() {
         // }
 
         // 显示图像
+        string windowName = "Armor Tracking - FPS: " + to_string((int)fps);
+        setWindowTitle("Armor Tracking", windowName);
+        // 输出目标信息
+        // string tvecText = "Pos: x " + to_string(static_cast<int>(measuredPos.x)) + " y " + to_string(static_cast<int>(measuredPos.y)) + " z " + to_string(static_cast<int>(measuredPos.z));
+        // putText(frame, tvecText, Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.7, Scalar(255, 255, 255), 2);
+        Config& c = Config::get();
         imshow("Armor Tracking", frame);
         char key = waitKey(100);  // 等待1ms，若需要按帧率播放可适当增加
         if (key == 'q' || key == 'Q') break;
+        
     }
 
     // 9. 清理资源

@@ -1,5 +1,6 @@
 #include "PreProcess.hpp"
 #include "Config.hpp"
+#include <algorithm>
 
 // 排列角点 - 基于坐标对比（按 y 排序再按 x 排序）
 vector<Point2f> sortCorners(const RotatedRect& rect) {
@@ -40,17 +41,20 @@ vector<Point2f> sortCorners(const RotatedRect& rect) {
 
 Mat PreProcess::process(const Mat& frame){
     Config& c = Config::get();
+
+    // 检查输入图像
+    if(frame.empty()) {
+        cerr << "[预处理] 输入图像为空！" << endl;
+        return Mat();
+    }
+
     // 转灰度
     Mat gray;
     cvtColor(frame, gray, COLOR_BGR2GRAY);
 
-    // 高斯模糊
-    Mat blur;
-    GaussianBlur(gray, blur, Size(c.preprocess.gaussian_k_size, c.preprocess.gaussian_k_size), c.preprocess.gaussian_sigma);
-
-    // 降曝光（可选，注释掉测试不降曝光的效果）
+    // 降曝光
     Mat contrast;
-    blur.convertTo(contrast, CV_8U, c.preprocess.rdc_exposure_x, c.preprocess.rdc_exposure_y);
+    gray.convertTo(contrast, CV_8U, c.preprocess.rdc_exposure_x, c.preprocess.rdc_exposure_y);
 
     // OTSU二值化
     Mat binary;
@@ -62,21 +66,25 @@ Mat PreProcess::process(const Mat& frame){
         cout << "[预处理] OTSU阈值: " << otsu_thresh << endl;
     }
 
+    // 高斯模糊
+    Mat blur;
+    GaussianBlur(binary, blur, Size(c.preprocess.gaussian_k_size, c.preprocess.gaussian_k_size), c.preprocess.gaussian_sigma);
+
     // 形态学操作
     Mat kernel = getStructuringElement(MORPH_RECT, Size(c.preprocess.morph_k_size, c.preprocess.morph_k_size));
-    morphologyEx(binary, binary, MORPH_CLOSE, kernel);
-    morphologyEx(binary, binary, MORPH_OPEN, kernel);
+    morphologyEx(blur, blur, MORPH_OPEN, kernel);
+    morphologyEx(blur, blur, MORPH_CLOSE, kernel);
 
-    imshow("binary", binary);
-    return binary;
+    imshow("binary", blur);
+    return blur;
 }
 
-vector<LightBar> PreProcess::detectLightBars(const Mat& binary){
+vector<LightBar> PreProcess::detectLightBars(const Mat& blur){
     Config& c = Config::get();
     // 提取轮廓
     vector<vector<Point>> contours;
     vector<Vec4i> hierarcy;
-    findContours(binary, contours, hierarcy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
+    findContours(blur, contours, hierarcy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
 
     // 筛选灯条
     vector<LightBar> detected_bars;
@@ -87,7 +95,7 @@ vector<LightBar> PreProcess::detectLightBars(const Mat& binary){
 
         // 面积筛选
         double area = contourArea(contour);
-        if(area < c.preprocess.min_area || area > c.preprocess.max_area) {
+        if(area < c.preprocess.min_area && area > c.preprocess.max_area) {
             filtered_area++;
             continue;
         }
@@ -116,12 +124,6 @@ vector<LightBar> PreProcess::detectLightBars(const Mat& binary){
             filtered_angle++;
             continue;
         }
-        // // 矩形度
-        // vector<Point> hull;
-        // convexHull(contour, hull);
-        // double hullArea = contourArea(hull);
-        // double rect_rate = area / hullArea;
-        // if(rect_rate < c.preprocess.min_rect_rate || rect_rate > c.preprocess.max_rect_rate) continue;
 
         //排列角点
         LightBar light;
@@ -136,7 +138,7 @@ vector<LightBar> PreProcess::detectLightBars(const Mat& binary){
         detected_bars.push_back(light);
     }
 
-    // 输出筛选统计信息（每10帧输出一次，避免刷屏）
+    // 输出筛选统计信息
     static int frame_count = 0;
     if(++frame_count % 10 == 0) {
         cout << "[灯条筛选] 总轮廓:" << total
@@ -151,16 +153,38 @@ vector<LightBar> PreProcess::detectLightBars(const Mat& binary){
 
 vector<Point2f> PreProcess::calculateArmorCorners(const Armor& armor){
     vector<Point2f> corners(4);
+    
+    // 收集装甲板的四个关键角点：左灯条的左上、左下 和 右灯条的右上、右下
+    // 假设左右灯条的 bar_pts 已通过 sortCorners 排序为 [左上, 右上, 右下, 左下]
+    vector<Point2f> allPts;
+    allPts.push_back(armor.left.bar_pts[0]);   // 左灯条左上
+    allPts.push_back(armor.left.bar_pts[3]);   // 左灯条左下
+    allPts.push_back(armor.right.bar_pts[1]);  // 右灯条右上
+    allPts.push_back(armor.right.bar_pts[2]);  // 右灯条右下
 
-    // 获取左右灯条四个角点
-    const vector<Point2f>& left_corners = armor.left.bar_pts;
-    const vector<Point2f>& right_corners = armor.right.bar_pts;
+    // 按 y 坐标升序排序，y 小的为上排
+    sort(allPts.begin(), allPts.end(), [](const Point2f& a, const Point2f& b) {
+        return a.y < b.y;
+    });
 
-    // 装甲板角点顺序： 左上，右上，右下，左下
-    corners[0] = left_corners[0];
-    corners[1] = right_corners[1];
-    corners[2] = right_corners[2];
-    corners[3] = left_corners[3];
+    // 前两个点为上排，后两个点为下排
+    vector<Point2f> top(allPts.begin(), allPts.begin() + 2);
+    vector<Point2f> bottom(allPts.begin() + 2, allPts.end());
+
+    // 上排按 x 升序（左到右）
+    sort(top.begin(), top.end(), [](const Point2f& a, const Point2f& b) {
+        return a.x < b.x;
+    });
+    // 下排按 x 升序
+    sort(bottom.begin(), bottom.end(), [](const Point2f& a, const Point2f& b) {
+        return a.x < b.x;
+    });
+
+    // 组装顺序：左上、右上、右下、左下
+    corners[0] = top[0];
+    corners[1] = top[1];
+    corners[2] = bottom[1];
+    corners[3] = bottom[0];
 
     return corners;
 }
@@ -182,14 +206,13 @@ vector<Armor> PreProcess::detectArmors(const vector<LightBar>& detected_bars){
             // 高度差过滤
             float height_diff = abs(left.bar_length - right.bar_length);
             float height_avg = (left.bar_length + right.bar_length) / 2.0f;
-            if(height_diff / height_avg > c.armor.max_height_diff) continue;
+            if(height_diff > c.armor.max_height_diff) continue;
 
-            // 计算中心点距离和比例
+            // 计算中心点距离
             float center_dist = norm(left.bar_center - right.bar_center);
-            // 中心距离过滤
-            if(center_dist < c.armor.min_center_dist || center_dist > c.armor.max_center_dist) continue;
-            float dist_ratio = center_dist / height_avg;
-            if(dist_ratio < c.armor.min_dist_ratio || dist_ratio > c.armor.max_dist_ratio) continue;
+            // 灯条中心距离过滤
+            if(center_dist < c.armor.min_center_dist) continue;
+            if(center_dist > c.armor.max_center_dist) continue;
 
             // 计算两灯条中心连线角度
             float connect_angle = atan2(
@@ -205,7 +228,8 @@ vector<Armor> PreProcess::detectArmors(const vector<LightBar>& detected_bars){
             left_angle_diff = min(left_angle_diff, 180 - left_angle_diff);
             right_angle_diff = min(right_angle_diff, 180 - right_angle_diff);
 
-            if(left_angle_diff > c.armor.max_angle_diff || right_angle_diff > c.armor.max_angle_diff) continue;
+            if(left_angle_diff > c.armor.max_angle_diff) continue;
+            if(right_angle_diff > c.armor.max_angle_diff) continue;
 
             // 通过筛选构建装甲板
             Armor armor;
@@ -218,6 +242,11 @@ vector<Armor> PreProcess::detectArmors(const vector<LightBar>& detected_bars){
 
             armor.armor_width = center_dist;
             armor.armor_height = height_avg;
+
+            // 计算装甲板宽高比
+            float armor_w_h_ratio = armor.armor_width / armor.armor_height;
+            if(armor_w_h_ratio < c.armor.min_w_h_ratio) continue;
+            if(armor_w_h_ratio > c.armor.max_w_h_ratio) continue;
 
             // 计算角度
             armor.armor_angle = (left.bar_angle + right.bar_angle) / 2.0f;
