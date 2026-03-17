@@ -109,11 +109,18 @@ PnPResult PnPSolver::solvePnP(const vector<Point2f>& imagePoints) {
     // 计算旋转矩阵
     Rodrigues(result.rotationVec, result.rotationMatrix);
 
+    // Debug
+    cout << "yaw:" << result.rotationVec.at<double>(0) << " pitch:" << result.rotationVec.at<double>(1)
+         << " roll:" << result.rotationVec.at<double>(2) << endl;
+
     // 距离和平移向量
     result.distance = norm(result.translationVec);
     result.position = Point3f(result.translationVec.at<double>(0),
                                result.translationVec.at<double>(1),
                                result.translationVec.at<double>(2));
+                               
+    // Debug
+    cout << "PnP解算成功！距离: " << result.distance << " mm" << endl;
 
     // 计算重投影误差
     vector<Point2f> projPoints;
@@ -124,18 +131,20 @@ PnPResult PnPSolver::solvePnP(const vector<Point2f>& imagePoints) {
         error += norm(imagePoints[i] - projPoints[i]);
     }
     result.reprojectionError = error / imagePoints.size();
+    cout << "重投影误差:" << result.reprojectionError << endl;
 
     calculateEulerAngles(result);
     result.isValid = true;
     return result;
 }
 
+// 计算欧拉角
 void PnPSolver::calculateEulerAngles(PnPResult& result) {
     Mat R = result.rotationMatrix;
     if (abs(R.at<double>(2,0)) < 0.999) {
-        result.yaw   = atan2(-R.at<double>(2,0), R.at<double>(0,0));
-        result.pitch = asin(R.at<double>(1,0));
-        result.roll  = atan2(-R.at<double>(1,2), R.at<double>(1,1));
+        result.yaw   = atan2(R.at<double>(1,0), R.at<double>(0,0)); 
+        result.pitch = asin(-R.at<double>(2,0));
+        result.roll  = atan2(R.at<double>(2,1), R.at<double>(2,2));
     } else {
         result.yaw = 0;
         if (R.at<double>(2,0) > 0) {
@@ -146,6 +155,15 @@ void PnPSolver::calculateEulerAngles(PnPResult& result) {
             result.roll  = atan2(-R.at<double>(0,1), -R.at<double>(0,2));
         }
     }
+
+    // 转换为角度制（度）并存入 result
+    const double rad2deg = 180.0 / CV_PI;
+    result.yaw   *= rad2deg;
+    result.pitch *= rad2deg;
+    result.roll  *= rad2deg;
+
+    // Debug）
+    cout << "PnP欧拉角(度): yaw=" << result.yaw << ", pitch=" << result.pitch << ", roll=" << result.roll << endl;
 }
 
 // ==================== AngleSolver 实现 ====================
@@ -157,6 +175,8 @@ AngleSolver::AngleSolver() {
     cameraOffset = Point3f(config.ballistic.cameraOffsetX,    // 偏移 X (mm)
                            config.ballistic.cameraOffsetY,    // 偏移 Y (mm)
                            config.ballistic.cameraOffsetZ);   // 偏移 Z (mm)
+    // Debug
+    cout << "偏移x：" << cameraOffset.x << "mm 偏移y：" << cameraOffset.y << "mm 偏移z：" << cameraOffset.z << "mm" << endl;
 }
 
 AimAngle AngleSolver::calculateAimAngle(const PnPResult& pnpResult) {
@@ -175,15 +195,22 @@ AimAngle AngleSolver::calculateAimAngle(const PnPResult& pnpResult) {
     float dz = targetGimbal.z / 1000.0f; // 前向距离（m）
     float dy = targetGimbal.y / 1000.0f; // 高度差（m），Y向下为正
 
-    // 水平转角
-    aim.yaw = atan2(targetGimbal.x, targetGimbal.z);
+    // 水平转角（弧度）
+    float yaw_rad = atan2(targetGimbal.x, targetGimbal.z);
+    // 俯仰角（弧度，含重力补偿）
+    float pitch_rad = solvePitch(dz, dy, bulletSpeed, gravity);
 
-    // 俯仰角（含重力补偿）
-    aim.pitch = solvePitch(dz, dy, bulletSpeed, gravity);
+    // 转换为角度制并存入 aim
+    const float rad2deg = 180.0f / static_cast<float>(CV_PI);
+    aim.yaw   = yaw_rad * rad2deg;
+    aim.pitch = pitch_rad * rad2deg;
 
-    // 飞行时间
+    // Debug重力补偿后（输出角度）
+    cout << "重力补偿后yaw:" << aim.yaw << "° pitch:" << aim.pitch << "°" << endl;
+
+    // 飞行时间（仍用弧度计算）
     if (bulletSpeed > 0 && aim.pitch != 0) {
-        aim.flyTime = dz / (bulletSpeed * cos(aim.pitch));
+        aim.flyTime = dz / (bulletSpeed * cos(pitch_rad)); // cos 需传入弧度
     } else {
         aim.flyTime = 0;
     }
