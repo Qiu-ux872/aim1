@@ -104,10 +104,10 @@ bool SerialPort::sendAimAngle(const AimAngle& aim) {
         return false;
     }
 
-    // 文本格式：yaw,pitch,distance,flyTime\n
+    // 文本格式：yaw,pitch,distance\n
     char buffer[128];
-    int len = snprintf(buffer, sizeof(buffer), "%.4f,%.4f,%.4f,%.4f\n",
-                      aim.yaw, aim.pitch, aim.distance, aim.flyTime);
+    int len = snprintf(buffer, sizeof(buffer), "%.4f,%.4f,%.4f\n",
+                      aim.yaw, aim.pitch, aim.distance);
 
     if (len <= 0 || len >= (int)sizeof(buffer)) {
         cerr << "格式化数据失败" << endl;

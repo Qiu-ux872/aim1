@@ -13,9 +13,10 @@
 using namespace std;
 using namespace cv;
 
+// 绘制检测到的装甲板（白色框）
 void drawArmor(const vector<Armor>& armors, Mat& frame){
     for(const auto& armor : armors){
-        // 绘制灯条中心（红色圆点）
+        // 绘制装甲板中心（红色圆点）
         circle(frame, armor.armor_center, 5, Scalar(0, 0, 255), -1);
         
         // 将浮点角点转换为整数点
@@ -23,8 +24,8 @@ void drawArmor(const vector<Armor>& armors, Mat& frame){
         for (const auto& pt : armor.armor_pts) {
             intPts.push_back(Point(cvRound(pt.x), cvRound(pt.y)));
         }
-        // 使用 polylines 绘制装甲板轮廓
-        polylines(frame, intPts, true, Scalar(0, 255, 0), 3);
+        // 使用 polylines 绘制装甲板轮廓（白色）
+        polylines(frame, intPts, true, Scalar(255, 255, 255), 3);
     }
 }
 
@@ -65,6 +66,7 @@ Point2f projectPoint(const Point3f& pt, const Mat& cameraMatrix) {
     return pts2d[0];
 }
 
+// 绘制灯条（可选）
 void drawLightBar(const vector<LightBar>& detected_bars, Mat& frame){
     for(const auto& bar : detected_bars){
         // 绘制灯条中心（红色圆点）
@@ -73,7 +75,7 @@ void drawLightBar(const vector<LightBar>& detected_bars, Mat& frame){
         // 绘制旋转矩形
         const auto& pts = bar.bar_pts;
         for (int i = 0; i < 4; i++) {
-            line(frame, pts[i], pts[(i+1)%4], Scalar(0, 255, 0), 2); // 蓝色线条
+            line(frame, pts[i], pts[(i+1)%4], Scalar(0, 255, 0), 2);
         }
     }
 }
@@ -137,6 +139,7 @@ int main() {
         // 匹配装甲板
         vector<Armor> armors = PreProcess::detectArmors(lightBars);
 
+        // 绘制灯条（可选）
         drawLightBar(lightBars, frame);
 
         // 默认初始化为无效状态
@@ -154,13 +157,13 @@ int main() {
                 hasTarget = true;
                 measuredPos = pnpRes.position;
 
-                // 绘制装甲板框（绿色线条）
-                const auto& pts = target.armor_pts;
-                for (int i = 0; i < 4; i++) {
-                    line(frame, pts[i], pts[(i+1)%4], Scalar(0, 255, 0), 2);
-                }
+                // 绘制检测到的装甲板框（白色，已由 drawArmor 完成，但此处也可保留备用）
+                // 但 drawArmor 会在后面统一绘制，所以这里可以不重复绘制
             }
         }
+
+        // 绘制检测到的装甲板（白色）
+        drawArmor(armors, frame);
 
         // 卡尔曼滤波更新/预测
         Point3f estPos, predPos;
@@ -171,7 +174,7 @@ int main() {
                 predPos = measuredPos;
             } else {
                 estPos = tracker.update(measuredPos, timeStamp);
-                predPos = tracker.getPredictionPosition();  // 注意方法名：getPredictionPosition()
+                predPos = tracker.getPredictionPosition();
             }
         } else {
             if (tracker.isInitialized()) {
@@ -183,11 +186,9 @@ int main() {
         // 计算瞄准角度
         AimAngle aim;
         if (tracker.isInitialized()) {
-            // 使用估计位置作为目标位置计算角度
-            // 构造一个临时 PnPResult 仅包含位置信息
             PnPResult dummy;
-            dummy.position = estPos;
-            dummy.distance = norm(estPos);  // 粗略距离，实际 AngleSolver 只使用 position
+            dummy.position = estPos;  // 使用当前估计位置计算角度
+            dummy.distance = norm(estPos);
             aim = angleSolver.calculateAimAngle(dummy);
         }
 
@@ -205,12 +206,38 @@ int main() {
                 Point2f ptMeas = projectPoint(measuredPos, cameraMatrix);
                 circle(frame, ptMeas, 5, Scalar(255, 0, 0), -1);
             }
-            // 估计点（绿色）
+            // 估计点（白色）
             Point2f ptEst = projectPoint(estPos, cameraMatrix);
-            circle(frame, ptEst, 5, Scalar(0, 255, 0), -1);
+            circle(frame, ptEst, 5, Scalar(255, 255, 255), -1);
             // 预测点（红色）
             Point2f ptPred = projectPoint(predPos, cameraMatrix);
             circle(frame, ptPred, 5, Scalar(0, 0, 255), -1);
+        }
+
+        // 绘制卡尔曼估计的装甲板框（绿色）
+        if (tracker.isInitialized()) {
+            const float armorWidth = 135.0f;   // 小装甲板宽度（mm）
+            const float armorHeight = 125.0f;  // 小装甲板高度（mm）
+
+            // 在相机坐标系下，假设装甲板平面垂直于Z轴，计算四个角点
+            vector<Point3f> objPts(4);
+            objPts[0] = estPos + Point3f(-armorWidth/2, -armorHeight/2, 0); // 左上
+            objPts[1] = estPos + Point3f( armorWidth/2, -armorHeight/2, 0); // 右上
+            objPts[2] = estPos + Point3f( armorWidth/2,  armorHeight/2, 0); // 右下
+            objPts[3] = estPos + Point3f(-armorWidth/2,  armorHeight/2, 0); // 左下
+
+            // 投影到图像平面
+            vector<Point2f> imgPts;
+            for (const auto& pt : objPts) {
+                imgPts.push_back(projectPoint(pt, cameraMatrix));
+            }
+
+            // 转换为整数点并绘制闭合多边形（绿色）
+            vector<Point> intPts;
+            for (const auto& pt : imgPts) {
+                intPts.push_back(Point(cvRound(pt.x), cvRound(pt.y)));
+            }
+            polylines(frame, intPts, true, Scalar(0, 255, 0), 2);
         }
 
         // 显示图像

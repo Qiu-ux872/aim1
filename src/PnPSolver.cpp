@@ -162,7 +162,7 @@ void PnPSolver::calculateEulerAngles(PnPResult& result) {
     result.pitch *= rad2deg;
     result.roll  *= rad2deg;
 
-    // Debug）
+    // Debug
     cout << "PnP欧拉角(度): yaw=" << result.yaw << ", pitch=" << result.pitch << ", roll=" << result.roll << endl;
 }
 

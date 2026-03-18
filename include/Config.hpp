@@ -42,6 +42,8 @@ struct ArmorConfig{
     float max_w_h_ratio  = 4.0;     // 装甲板最大宽高比
     float min_center_dist = 0.5;    // 最小中心点距离
     float max_center_dist = 3.0;    // 最大中心点距离
+    float min_center_bar_ratio = 0.8;     
+    float max_center_bar_ratio = 1.8;
 };
 
 struct Ballistic{

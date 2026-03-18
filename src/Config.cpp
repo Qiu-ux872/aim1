@@ -7,6 +7,7 @@ Config& Config::get(){
 }
 
 Config::Config(){
+    
     loadYaml("config/Config.yaml");
 }
 
@@ -40,6 +41,8 @@ void Config::loadYaml(const string& file_name){
         armor.max_center_dist = node["armor"]["max_center_dist"].as<float>();
         armor.min_w_h_ratio = node["armor"]["min_w_h_ratio"].as<float>();
         armor.max_w_h_ratio = node["armor"]["max_w_h_ratio"].as<float>();
+        armor.max_center_bar_ratio = node["armor"]["max_center_bar_ratio"].as<float>();
+        armor.min_center_bar_ratio = node["armor"]["min_center_bar_ratio"].as<float>();
 
         ballistic.bulletSpeed = node["Ballistic"]["bulletSpeed"].as<float>();
         ballistic.gravity = node["Ballistic"]["gravity"].as<float>();

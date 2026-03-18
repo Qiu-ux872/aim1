@@ -83,8 +83,8 @@ vector<LightBar> PreProcess::detectLightBars(const Mat& blur){
     Config& c = Config::get();
     // 提取轮廓
     vector<vector<Point>> contours;
-    vector<Vec4i> hierarcy;
-    findContours(blur, contours, hierarcy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
+    vector<Vec4i> hierarchy;
+    findContours(blur, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
 
     // 筛选灯条
     vector<LightBar> detected_bars;
@@ -95,7 +95,7 @@ vector<LightBar> PreProcess::detectLightBars(const Mat& blur){
 
         // 面积筛选
         double area = contourArea(contour);
-        if(area < c.preprocess.min_area && area > c.preprocess.max_area) {
+        if(area < c.preprocess.min_area || area > c.preprocess.max_area) {
             filtered_area++;
             continue;
         }
@@ -108,19 +108,22 @@ vector<LightBar> PreProcess::detectLightBars(const Mat& blur){
         if(width > length) swap(width, length);
 
         // 对比宽高比
-        float ratio = 0.0f; // 【必做】变量显式初始化
-        const float eps = 1e-6; // 浮点精度容错值，避免除0
-        if (width > eps) {
-            ratio = length / width;
-        }
-        float angle = rect.angle;
-        // 宽高比
-        if(ratio < c.preprocess.min_ratio || ratio > c.preprocess.max_ratio) {
+        const float eps = 1e-6f;
+        if(width <= eps){
             filtered_ratio++;
             continue;
         }
+
+        float ratio = length / width;
+        float angle = rect.angle;
+
+        // 宽高比筛选
+        if(ratio < c.preprocess.min_ratio) continue;
+        if(ratio > c.preprocess.max_ratio) continue;
+
         // 偏转角
-        if(abs(angle) < 90 - c.preprocess.max_angle) {
+        const float VERTICAL_ANGLE = 90.0f;
+        if(abs(angle) < VERTICAL_ANGLE - c.preprocess.max_angle) {
             filtered_angle++;
             continue;
         }
@@ -247,6 +250,14 @@ vector<Armor> PreProcess::detectArmors(const vector<LightBar>& detected_bars){
             float armor_w_h_ratio = armor.armor_width / armor.armor_height;
             if(armor_w_h_ratio < c.armor.min_w_h_ratio) continue;
             if(armor_w_h_ratio > c.armor.max_w_h_ratio) continue;
+
+            // 装甲板中心距与灯条比
+            float half_center_dist = center_dist / 2.0f;
+            float left_ratio = half_center_dist / left.bar_length;
+            float right_ratio = half_center_dist / right.bar_length;
+            float avg_ratio = (left_ratio + right_ratio) / 2.0f;
+            if(avg_ratio < c.armor.min_center_bar_ratio) continue;
+            if(avg_ratio > c.armor.max_center_bar_ratio) continue;
 
             // 计算角度
             armor.armor_angle = (left.bar_angle + right.bar_angle) / 2.0f;
