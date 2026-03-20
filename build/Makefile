@@ -273,29 +273,29 @@ src/SerialPort.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/SerialPort.cpp.s
 .PHONY : src/SerialPort.cpp.s
 
-src/main.o: src/main.cpp.o
-.PHONY : src/main.o
+src/main_test.o: src/main_test.cpp.o
+.PHONY : src/main_test.o
 
 # target to build an object file
-src/main.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/main.cpp.o
-.PHONY : src/main.cpp.o
+src/main_test.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/main_test.cpp.o
+.PHONY : src/main_test.cpp.o
 
-src/main.i: src/main.cpp.i
-.PHONY : src/main.i
+src/main_test.i: src/main_test.cpp.i
+.PHONY : src/main_test.i
 
 # target to preprocess a source file
-src/main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/main.cpp.i
-.PHONY : src/main.cpp.i
+src/main_test.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/main_test.cpp.i
+.PHONY : src/main_test.cpp.i
 
-src/main.s: src/main.cpp.s
-.PHONY : src/main.s
+src/main_test.s: src/main_test.cpp.s
+.PHONY : src/main_test.s
 
 # target to generate assembly for a file
-src/main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/main.cpp.s
-.PHONY : src/main.cpp.s
+src/main_test.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/main_test.cpp.s
+.PHONY : src/main_test.cpp.s
 
 # Help Target
 help:
@@ -324,9 +324,9 @@ help:
 	@echo "... src/SerialPort.o"
 	@echo "... src/SerialPort.i"
 	@echo "... src/SerialPort.s"
-	@echo "... src/main.o"
-	@echo "... src/main.i"
-	@echo "... src/main.s"
+	@echo "... src/main_test.o"
+	@echo "... src/main_test.i"
+	@echo "... src/main_test.s"
 .PHONY : help
 
 

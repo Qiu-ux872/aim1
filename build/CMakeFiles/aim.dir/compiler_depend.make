@@ -2611,7 +2611,7 @@ CMakeFiles/aim.dir/src/SerialPort.cpp.o: ../src/SerialPort.cpp \
   /usr/include/asm-generic/ioctl.h \
   /usr/include/x86_64-linux-gnu/bits/ioctl-types.h
 
-CMakeFiles/aim.dir/src/main.cpp.o: ../src/main.cpp \
+CMakeFiles/aim.dir/src/main_test.cpp.o: ../src/main_test.cpp \
   /usr/include/stdc-predef.h \
   /usr/include/c++/11/iostream \
   /usr/include/x86_64-linux-gnu/c++/11/bits/c++config.h \
@@ -3040,10 +3040,6 @@ CMakeFiles/aim.dir/src/main.cpp.o: ../src/main.cpp \
   /usr/include/yaml-cpp/node/detail/impl.h \
   /usr/include/yaml-cpp/node/parse.h \
   /usr/include/yaml-cpp/node/emit.h \
-  ../include/CameraDriver.hpp \
-  /usr/include/CameraApi.h \
-  /usr/include/CameraDefine.h \
-  /usr/include/CameraStatus.h \
   ../include/PreProcess.hpp \
   ../include/Param.hpp \
   ../include/PnPSolver.hpp \
@@ -3051,7 +3047,7 @@ CMakeFiles/aim.dir/src/main.cpp.o: ../src/main.cpp \
   ../include/SerialPort.hpp
 
 
-../src/main.cpp:
+../src/main_test.cpp:
 
 /usr/include/asm-generic/ioctls.h:
 

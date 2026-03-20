@@ -11,6 +11,8 @@ class PreProcess{
 public:
     static Mat process(const Mat& frame);
     static vector<LightBar> detectLightBars(const Mat& binary);
-    static vector<Armor> detectArmors(const vector<LightBar>& detected_bars);
+    static vector<Armor> detectArmors(const vector<LightBar>& detected_bars, const Point3f* predictedPos = nullptr);
     static vector<Point2f> calculateArmorCorners(const Armor& armor);
+
+    static Mat camera_matrix;    
 };

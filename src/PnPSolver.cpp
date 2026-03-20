@@ -109,7 +109,7 @@ PnPResult PnPSolver::solvePnP(const vector<Point2f>& imagePoints) {
     // 计算旋转矩阵
     Rodrigues(result.rotationVec, result.rotationMatrix);
 
-    // Debug
+    // ===============================Debug===================================
     cout << "yaw:" << result.rotationVec.at<double>(0) << " pitch:" << result.rotationVec.at<double>(1)
          << " roll:" << result.rotationVec.at<double>(2) << endl;
 
@@ -156,7 +156,7 @@ void PnPSolver::calculateEulerAngles(PnPResult& result) {
         }
     }
 
-    // 转换为角度制（度）并存入 result
+    // 转换为角度制
     const double rad2deg = 180.0 / CV_PI;
     result.yaw   *= rad2deg;
     result.pitch *= rad2deg;
