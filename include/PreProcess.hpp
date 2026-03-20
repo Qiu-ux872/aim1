@@ -14,5 +14,6 @@ public:
     static vector<Armor> detectArmors(const vector<LightBar>& detected_bars, const Point3f* predictedPos = nullptr);
     static vector<Point2f> calculateArmorCorners(const Armor& armor);
 
-    static Mat camera_matrix;    
+    static Mat camera_matrix;
+    static Mat dist_coeffs;
 };

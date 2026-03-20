@@ -29,30 +29,51 @@ double getCurrentTimeSec() {
     return chrono::duration<double>(now.time_since_epoch()).count();
 }
 
-bool loadCameraMatrix(const string& filename, Mat& cameraMatrix) {
+bool loadCameraParams(const string& filename, Mat& cameraMatrix, Mat& distCoeffs) {
     FileStorage fs(filename, FileStorage::READ);
     if (!fs.isOpened()) {
         cerr << "【警告】无法打开相机参数文件: " << filename << "，将使用默认内参！" << endl;
         cameraMatrix = (Mat_<double>(3,3) << 800, 0, 320, 0, 800, 240, 0, 0, 1);
+        distCoeffs = Mat::zeros(5, 1, CV_64F);
         return false;
     }
+
+    // 读取相机内参矩阵
     fs["camera_matrix"] >> cameraMatrix;
-    fs.release();
     if (cameraMatrix.empty() || cameraMatrix.rows != 3 || cameraMatrix.cols != 3) {
         cerr << "【警告】文件中没有有效的 camera_matrix，将使用默认内参！" << endl;
         cameraMatrix = (Mat_<double>(3,3) << 800, 0, 320, 0, 800, 240, 0, 0, 1);
+        distCoeffs = Mat::zeros(5, 1, CV_64F);
+        fs.release();
         return false;
     }
+
+    // 读取畸变系数
+    fs["dist_coeffs"] >> distCoeffs;
+    if (distCoeffs.empty()) {
+        cerr << "【警告】文件中没有有效的 dist_coeffs，将使用零向量！" << endl;
+        distCoeffs = Mat::zeros(5, 1, CV_64F);
+    } else {
+        // 确保为列向量
+        if (distCoeffs.rows == 1 && distCoeffs.cols > 1) {
+            distCoeffs = distCoeffs.reshape(1, distCoeffs.cols);
+        } else if (distCoeffs.cols != 1 || distCoeffs.rows < 4) {
+            cerr << "【警告】畸变系数格式异常，将使用零向量！" << endl;
+            distCoeffs = Mat::zeros(5, 1, CV_64F);
+        }
+    }
+
     PreProcess::camera_matrix = cameraMatrix.clone();
+    PreProcess::dist_coeffs = distCoeffs.clone();
     cout << "相机内参矩阵加载成功！" << endl;
     return true;
 }
 
-Point2f projectPoint(const Point3f& pt, const Mat& cameraMatrix) {
+Point2f projectPoint(const Point3f& pt, const Mat& cameraMatrix, const Mat& distCoeffs) {
     vector<Point3f> pts3d = {pt};
     vector<Point2f> pts2d;
     cv::projectPoints(pts3d, Mat::zeros(3,1,CV_64F), Mat::zeros(3,1,CV_64F),
-                      cameraMatrix, noArray(), pts2d);
+                      cameraMatrix, distCoeffs, pts2d);
     return pts2d[0];
 }
 
@@ -60,8 +81,8 @@ int main() {
     Config::get();
     cout << "配置加载成功" << endl;
 
-    Mat cameraMatrix;
-    loadCameraMatrix("config/calibration.yml", cameraMatrix);
+    Mat cameraMatrix, distCoeffs;
+    loadCameraParams("config/calibration.yml", cameraMatrix, distCoeffs);
 
     string videoPath = "data/blue1.mp4";
     VideoCapture cap(videoPath);
@@ -204,12 +225,12 @@ int main() {
         // 绘制卡尔曼滤波点
         if (tracker.isInitialized()) {
             if (hasTarget) {
-                Point2f ptMeas = projectPoint(measuredPos, cameraMatrix);
+                Point2f ptMeas = projectPoint(measuredPos, cameraMatrix, distCoeffs);
                 circle(frame, ptMeas, 5, Scalar(255, 0, 0), -1);
             }
-            Point2f ptEst = projectPoint(estPos, cameraMatrix);
+            Point2f ptEst = projectPoint(estPos, cameraMatrix, distCoeffs);
             circle(frame, ptEst, 5, Scalar(255, 255, 255), -1);
-            Point2f ptPred = projectPoint(predPos, cameraMatrix);
+            Point2f ptPred = projectPoint(predPos, cameraMatrix, distCoeffs);
             circle(frame, ptPred, 5, Scalar(0, 0, 255), -1);
         }
 
@@ -226,7 +247,7 @@ int main() {
 
             vector<Point2f> imgPts;
             for (const auto& pt : objPts) {
-                imgPts.push_back(projectPoint(pt, cameraMatrix));
+                imgPts.push_back(projectPoint(pt, cameraMatrix, distCoeffs));
             }
 
             vector<Point> intPts;

@@ -3,7 +3,8 @@
 #include <algorithm>
 
 Mat PreProcess::camera_matrix;
-extern Point2f projectPoint(const Point3f& pt, const Mat& cameraMatrix);
+Mat PreProcess::dist_coeffs;
+extern Point2f projectPoint(const Point3f& pt, const Mat& cameraMatrix, const Mat& distCoeffs);
 
 // 排列角点 - 基于坐标对比（按 y 排序再按 x 排序）
 vector<Point2f> sortCorners(const RotatedRect &rect)
@@ -280,7 +281,7 @@ vector<Armor> PreProcess::detectArmors(const vector<LightBar>& detected_bars, co
     // 卡尔曼稳定识别：如果提供了预测位置，选择最接近的装甲板
     if (predictedPos != nullptr && !armors.empty() && !PreProcess::camera_matrix.empty())
     {
-        Point2f predImg = projectPoint(*predictedPos, PreProcess::camera_matrix);
+        Point2f predImg = projectPoint(*predictedPos, PreProcess::camera_matrix, PreProcess::dist_coeffs);
         int bestIdx = 0;
         float minDist = norm(armors[0].armor_center - predImg);
         for (size_t i = 1; i < armors.size(); i++)
