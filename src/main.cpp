@@ -9,6 +9,7 @@
 #include "PnPSolver.hpp"
 #include "KalmanTracker.hpp"
 #include "SerialPort.hpp"
+#include "UdpLogger.hpp"
 
 using namespace std;
 using namespace cv;
@@ -84,6 +85,12 @@ int main() {
     SerialPort serial;
     if (!serial.open()) {
         cerr << "串口打开失败，将无法发送角度" << endl;
+    }
+
+    // 初始化 UDP Logger（用于 PlotJuggler 调参）
+    UdpLogger udpLogger("127.0.0.1", 9870);
+    if (!udpLogger.isOpen()) {
+        cerr << "UDP 初始化失败，将无法发送调试数据" << endl;
     }
 
     namedWindow("Armor Tracking", WINDOW_AUTOSIZE);
@@ -166,6 +173,7 @@ int main() {
             aim = angleSolver.calculateAimAngle(dummy);
         }
 
+        // 控制台输出调试信息
         if (pnpRes.isValid) {
             cout << "PnP解算距离: " << pnpRes.distance << " mm" << endl;
             cout << "重力补偿前yaw: " << pnpRes.yaw << "°, pitch: " << pnpRes.pitch << "°" << endl;
@@ -174,12 +182,28 @@ int main() {
             cout << "重力补偿后yaw: " << aim.yaw << "°, pitch: " << aim.pitch << "°" << endl;
         }
 
+        // 串口发送
         if (serial.isOpen() && tracker.isInitialized()) {
             if (!serial.sendAimAngle(aim)) {
                 cerr << "串口发送失败" << endl;
             }
         }
 
+        // UDP 发送到 PlotJuggler
+        if (udpLogger.isOpen()) {
+            udpLogger.send(
+                timeStamp,
+                pnpRes.isValid ? pnpRes.distance : 0.0,
+                pnpRes.isValid ? pnpRes.yaw : 0.0,
+                pnpRes.isValid ? pnpRes.pitch : 0.0,
+                pnpRes.isValid ? pnpRes.roll : 0.0,
+                aim.yaw, aim.pitch,
+                estPos.x, estPos.y, estPos.z,
+                predPos.x, predPos.y, predPos.z
+            );
+        }
+
+        // 绘制卡尔曼滤波点
         if (tracker.isInitialized()) {
             if (hasTarget) {
                 Point2f ptMeas = projectPoint(measuredPos, cameraMatrix);

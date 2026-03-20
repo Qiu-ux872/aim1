@@ -273,6 +273,30 @@ src/SerialPort.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/SerialPort.cpp.s
 .PHONY : src/SerialPort.cpp.s
 
+src/UdpLogger.o: src/UdpLogger.cpp.o
+.PHONY : src/UdpLogger.o
+
+# target to build an object file
+src/UdpLogger.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/UdpLogger.cpp.o
+.PHONY : src/UdpLogger.cpp.o
+
+src/UdpLogger.i: src/UdpLogger.cpp.i
+.PHONY : src/UdpLogger.i
+
+# target to preprocess a source file
+src/UdpLogger.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/UdpLogger.cpp.i
+.PHONY : src/UdpLogger.cpp.i
+
+src/UdpLogger.s: src/UdpLogger.cpp.s
+.PHONY : src/UdpLogger.s
+
+# target to generate assembly for a file
+src/UdpLogger.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/UdpLogger.cpp.s
+.PHONY : src/UdpLogger.cpp.s
+
 src/main_test.o: src/main_test.cpp.o
 .PHONY : src/main_test.o
 
@@ -324,6 +348,9 @@ help:
 	@echo "... src/SerialPort.o"
 	@echo "... src/SerialPort.i"
 	@echo "... src/SerialPort.s"
+	@echo "... src/UdpLogger.o"
+	@echo "... src/UdpLogger.i"
+	@echo "... src/UdpLogger.s"
 	@echo "... src/main_test.o"
 	@echo "... src/main_test.i"
 	@echo "... src/main_test.s"

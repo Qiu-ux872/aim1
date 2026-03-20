@@ -8,6 +8,7 @@
 #include "PnPSolver.hpp"
 #include "KalmanTracker.hpp"
 #include "SerialPort.hpp"
+#include "UdpLogger.hpp"
 
 using namespace std;
 using namespace cv;
@@ -83,14 +84,19 @@ int main() {
         cerr << "串口打开失败，将无法发送角度" << endl;
     }
 
+    // 初始化 UDP Logger（用于 PlotJuggler 调参）
+    UdpLogger udpLogger("127.0.0.1", 9870);
+    if (!udpLogger.isOpen()) {
+        cerr << "UDP 初始化失败，将无法发送调试数据" << endl;
+    }
+
     namedWindow("Armor Tracking", WINDOW_AUTOSIZE);
 
     double lastTime = getCurrentTimeSec();
     int frameCount = 0;
     double fps = 0.0;
 
-    // 定义 predPos，用于存储卡尔曼预测的当前帧位置（初始为零）
-    Point3f predPos(0, 0, 0);
+    Point3f predPos(0, 0, 0); // 预测位置，用于卡尔曼辅助筛选
 
     while (true) {
         double timeStamp = getCurrentTimeSec();
@@ -109,10 +115,10 @@ int main() {
             break;
         }
 
-        Mat blur = PreProcess::process(frame);
-        vector<LightBar> lightBars = PreProcess::detectLightBars(blur);
+        Mat binary = PreProcess::process(frame);
+        vector<LightBar> lightBars = PreProcess::detectLightBars(binary);
 
-        // 匹配装甲板：如果卡尔曼已初始化，传入 predPos 地址；否则传入 nullptr
+        // 匹配装甲板，传入卡尔曼预测位置以辅助筛选
         vector<Armor> armors;
         if (tracker.isInitialized()) {
             armors = PreProcess::detectArmors(lightBars, &predPos);
@@ -140,16 +146,15 @@ int main() {
             }
         }
 
-        // 卡尔曼滤波更新/预测
         Point3f estPos;
         if (hasTarget) {
             if (!tracker.isInitialized()) {
                 tracker.init(measuredPos, timeStamp);
                 estPos = measuredPos;
-                predPos = measuredPos;   // 初始时预测等于当前
+                predPos = measuredPos;
             } else {
                 estPos = tracker.update(measuredPos, timeStamp);
-                predPos = tracker.getPredictionPosition(); // 更新为下一帧预测
+                predPos = tracker.getPredictionPosition();
             }
         } else {
             if (tracker.isInitialized()) {
@@ -161,11 +166,12 @@ int main() {
         AimAngle aim;
         if (tracker.isInitialized()) {
             PnPResult dummy;
-            dummy.position = predPos;   // 使用预测位置进行超前瞄准
+            dummy.position = predPos;
             dummy.distance = norm(estPos);
             aim = angleSolver.calculateAimAngle(dummy);
         }
 
+        // 控制台输出调试信息
         if (pnpRes.isValid) {
             cout << "PnP解算距离: " << pnpRes.distance << " mm" << endl;
             cout << "重力补偿前yaw: " << pnpRes.yaw << "°, pitch: " << pnpRes.pitch << "°" << endl;
@@ -174,10 +180,25 @@ int main() {
             cout << "重力补偿后yaw: " << aim.yaw << "°, pitch: " << aim.pitch << "°" << endl;
         }
 
+        // 串口发送
         if (serial.isOpen() && tracker.isInitialized()) {
             if (!serial.sendAimAngle(aim)) {
                 cerr << "串口发送失败" << endl;
             }
+        }
+
+        // UDP 发送到 PlotJuggler
+        if (udpLogger.isOpen()) {
+            udpLogger.send(
+                timeStamp,
+                pnpRes.isValid ? pnpRes.distance : 0.0,
+                pnpRes.isValid ? pnpRes.yaw : 0.0,
+                pnpRes.isValid ? pnpRes.pitch : 0.0,
+                pnpRes.isValid ? pnpRes.roll : 0.0,
+                aim.yaw, aim.pitch,
+                estPos.x, estPos.y, estPos.z,
+                predPos.x, predPos.y, predPos.z
+            );
         }
 
         // 绘制卡尔曼滤波点
