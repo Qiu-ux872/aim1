@@ -30,30 +30,54 @@ double getCurrentTimeSec() {
     return chrono::duration<double>(now.time_since_epoch()).count();
 }
 
-bool loadCameraMatrix(const string& filename, Mat& cameraMatrix) {
+// 同时加载相机内参矩阵和畸变系数
+bool loadCameraParams(const string& filename, Mat& cameraMatrix, Mat& distCoeffs) {
     FileStorage fs(filename, FileStorage::READ);
     if (!fs.isOpened()) {
         cerr << "【警告】无法打开相机参数文件: " << filename << "，将使用默认内参！" << endl;
         cameraMatrix = (Mat_<double>(3,3) << 800, 0, 320, 0, 800, 240, 0, 0, 1);
+        distCoeffs = Mat::zeros(5, 1, CV_64F);
         return false;
     }
+
+    // 读取相机内参矩阵
     fs["camera_matrix"] >> cameraMatrix;
-    fs.release();
     if (cameraMatrix.empty() || cameraMatrix.rows != 3 || cameraMatrix.cols != 3) {
         cerr << "【警告】文件中没有有效的 camera_matrix，将使用默认内参！" << endl;
         cameraMatrix = (Mat_<double>(3,3) << 800, 0, 320, 0, 800, 240, 0, 0, 1);
+        distCoeffs = Mat::zeros(5, 1, CV_64F);
+        fs.release();
         return false;
     }
+
+    // 读取畸变系数
+    fs["dist_coeffs"] >> distCoeffs;
+    if (distCoeffs.empty()) {
+        cerr << "【警告】文件中没有有效的 dist_coeffs，将使用零向量！" << endl;
+        distCoeffs = Mat::zeros(5, 1, CV_64F);
+    } else {
+        // 确保为列向量
+        if (distCoeffs.rows == 1 && distCoeffs.cols > 1) {
+            distCoeffs = distCoeffs.reshape(1, distCoeffs.cols);
+        } else if (distCoeffs.cols != 1 || distCoeffs.rows < 4) {
+            cerr << "【警告】畸变系数格式异常，将使用零向量！" << endl;
+            distCoeffs = Mat::zeros(5, 1, CV_64F);
+        }
+    }
+
+    // 赋值给 PreProcess 静态成员，供 detectArmors 中的投影使用
     PreProcess::camera_matrix = cameraMatrix.clone();
-    cout << "相机内参矩阵加载成功！" << endl;
+    PreProcess::dist_coeffs = distCoeffs.clone();
+    cout << "相机参数加载成功！" << endl;
     return true;
 }
 
-Point2f projectPoint(const Point3f& pt, const Mat& cameraMatrix) {
+// 三参数投影函数（带畸变系数）
+Point2f projectPoint(const Point3f& pt, const Mat& cameraMatrix, const Mat& distCoeffs) {
     vector<Point3f> pts3d = {pt};
     vector<Point2f> pts2d;
     cv::projectPoints(pts3d, Mat::zeros(3,1,CV_64F), Mat::zeros(3,1,CV_64F),
-                      cameraMatrix, noArray(), pts2d);
+                      cameraMatrix, distCoeffs, pts2d);
     return pts2d[0];
 }
 
@@ -61,8 +85,8 @@ int main() {
     Config::get();
     cout << "配置加载成功" << endl;
 
-    Mat cameraMatrix;
-    loadCameraMatrix("config/calibration.yml", cameraMatrix);
+    Mat cameraMatrix, distCoeffs;
+    loadCameraParams("config/calibration.yml", cameraMatrix, distCoeffs);
 
     CameraDriver camera;
     if (!camera.open()) {
@@ -87,7 +111,6 @@ int main() {
         cerr << "串口打开失败，将无法发送角度" << endl;
     }
 
-    // 初始化 UDP Logger（用于 PlotJuggler 调参）
     UdpLogger udpLogger("127.0.0.1", 9870);
     if (!udpLogger.isOpen()) {
         cerr << "UDP 初始化失败，将无法发送调试数据" << endl;
@@ -203,19 +226,19 @@ int main() {
             );
         }
 
-        // 绘制卡尔曼滤波点
+        // 绘制卡尔曼滤波点（使用三参数投影）
         if (tracker.isInitialized()) {
             if (hasTarget) {
-                Point2f ptMeas = projectPoint(measuredPos, cameraMatrix);
+                Point2f ptMeas = projectPoint(measuredPos, cameraMatrix, distCoeffs);
                 circle(frame, ptMeas, 5, Scalar(255, 0, 0), -1);
             }
-            Point2f ptEst = projectPoint(estPos, cameraMatrix);
+            Point2f ptEst = projectPoint(estPos, cameraMatrix, distCoeffs);
             circle(frame, ptEst, 5, Scalar(255, 255, 255), -1);
-            Point2f ptPred = projectPoint(predPos, cameraMatrix);
+            Point2f ptPred = projectPoint(predPos, cameraMatrix, distCoeffs);
             circle(frame, ptPred, 5, Scalar(0, 0, 255), -1);
         }
 
-        // 绘制卡尔曼估计的装甲板框（黄色）
+        // 绘制卡尔曼估计的装甲板框（黄色，使用三参数投影）
         if (tracker.isInitialized()) {
             const float armorWidth = 135.0f;
             const float armorHeight = 125.0f;
@@ -228,7 +251,7 @@ int main() {
 
             vector<Point2f> imgPts;
             for (const auto& pt : objPts) {
-                imgPts.push_back(projectPoint(pt, cameraMatrix));
+                imgPts.push_back(projectPoint(pt, cameraMatrix, distCoeffs));
             }
 
             vector<Point> intPts;
@@ -238,6 +261,16 @@ int main() {
             polylines(frame, intPts, true, Scalar(0, 255, 255), 2);
         }
 
+        if (pnpRes.isValid) {
+            string posText = format("X:%.1f Y:%.1f Z:%.1f", pnpRes.position.x, pnpRes.position.y, pnpRes.position.z);
+            putText(frame, posText, Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1, LINE_AA);
+            string angleText = format("Yaw:%.2f Pitch:%.2f Roll:%.2f", pnpRes.yaw, pnpRes.pitch, pnpRes.roll);
+            putText(frame, angleText, Point(10, 50), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1, LINE_AA);
+        } else {
+            putText(frame, "No Target", Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1, LINE_AA);
+        }
+
+        // 显示帧率和图像
         string windowName = "Armor Tracking - FPS: " + to_string((int)fps);
         setWindowTitle("Armor Tracking", windowName);
         imshow("Armor Tracking", frame);

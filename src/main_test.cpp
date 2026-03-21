@@ -38,7 +38,6 @@ bool loadCameraParams(const string& filename, Mat& cameraMatrix, Mat& distCoeffs
         return false;
     }
 
-    // 读取相机内参矩阵
     fs["camera_matrix"] >> cameraMatrix;
     if (cameraMatrix.empty() || cameraMatrix.rows != 3 || cameraMatrix.cols != 3) {
         cerr << "【警告】文件中没有有效的 camera_matrix，将使用默认内参！" << endl;
@@ -48,13 +47,11 @@ bool loadCameraParams(const string& filename, Mat& cameraMatrix, Mat& distCoeffs
         return false;
     }
 
-    // 读取畸变系数
     fs["dist_coeffs"] >> distCoeffs;
     if (distCoeffs.empty()) {
         cerr << "【警告】文件中没有有效的 dist_coeffs，将使用零向量！" << endl;
         distCoeffs = Mat::zeros(5, 1, CV_64F);
     } else {
-        // 确保为列向量
         if (distCoeffs.rows == 1 && distCoeffs.cols > 1) {
             distCoeffs = distCoeffs.reshape(1, distCoeffs.cols);
         } else if (distCoeffs.cols != 1 || distCoeffs.rows < 4) {
@@ -105,7 +102,6 @@ int main() {
         cerr << "串口打开失败，将无法发送角度" << endl;
     }
 
-    // 初始化 UDP Logger（用于 PlotJuggler 调参）
     UdpLogger udpLogger("127.0.0.1", 9870);
     if (!udpLogger.isOpen()) {
         cerr << "UDP 初始化失败，将无法发送调试数据" << endl;
@@ -117,7 +113,7 @@ int main() {
     int frameCount = 0;
     double fps = 0.0;
 
-    Point3f predPos(0, 0, 0); // 预测位置，用于卡尔曼辅助筛选
+    Point3f predPos(0, 0, 0);
 
     while (true) {
         double timeStamp = getCurrentTimeSec();
@@ -139,7 +135,6 @@ int main() {
         Mat binary = PreProcess::process(frame);
         vector<LightBar> lightBars = PreProcess::detectLightBars(binary);
 
-        // 匹配装甲板，传入卡尔曼预测位置以辅助筛选
         vector<Armor> armors;
         if (tracker.isInitialized()) {
             armors = PreProcess::detectArmors(lightBars, &predPos);
@@ -255,6 +250,15 @@ int main() {
                 intPts.push_back(Point(cvRound(pt.x), cvRound(pt.y)));
             }
             polylines(frame, intPts, true, Scalar(0, 255, 255), 2);
+        }
+
+        if (pnpRes.isValid) {
+            string text = format("X:%.1f Y:%.1f Z:%.1f", pnpRes.position.x, pnpRes.position.y, pnpRes.position.z);
+            putText(frame, text, Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1, LINE_AA);
+            text = format("Yaw:%.2f Pitch:%.2f", pnpRes.yaw, pnpRes.pitch);
+            putText(frame, text, Point(10, 50), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1, LINE_AA);
+        } else {
+            putText(frame, "No Target", Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1, LINE_AA);
         }
 
         string windowName = "Armor Tracking - FPS: " + to_string((int)fps);

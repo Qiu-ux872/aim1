@@ -24,7 +24,7 @@ set(SOURCES
     src/PnPSolver.cpp
     src/PreProcess.cpp
     src/SerialPort.cpp
-    src/main_test.cpp
+    src/main.cpp
     src/UdpLogger.cpp
 )
 
