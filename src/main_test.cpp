@@ -264,7 +264,7 @@ int main() {
         string windowName = "Armor Tracking - FPS: " + to_string((int)fps);
         setWindowTitle("Armor Tracking", windowName);
         imshow("Armor Tracking", frame);
-        char key = waitKey(100);
+        char key = waitKey(30);
         if (key == 'q' || key == 'Q') break;
     }
 

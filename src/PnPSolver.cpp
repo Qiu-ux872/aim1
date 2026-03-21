@@ -166,9 +166,7 @@ void PnPSolver::calculateEulerAngles(PnPResult& result) {
     cout << "PnP欧拉角(度): yaw=" << result.yaw << ", pitch=" << result.pitch << ", roll=" << result.roll << endl;
 }
 
-// ==================== AngleSolver 实现 ====================
 AngleSolver::AngleSolver() {
-    // 从全局配置读取重力补偿参数（需确保 Config 中已添加以下成员）
     const auto& config = Config::get();
     bulletSpeed = config.ballistic.bulletSpeed;               // 弹速 (m/s)
     gravity = config.ballistic.gravity;                       // 重力加速度 (m/s^2)

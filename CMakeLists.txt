@@ -19,25 +19,14 @@ include_directories(${CMAKE_SOURCE_DIR}/MindVisionSdk)
 # 收集源文件
 set(SOURCES
     src/Config.cpp
-    src/CameraDriver.cpp
+    src/CameraDriver.cpp          # 仅相机版需要
     src/KalmanTracker.cpp
     src/PnPSolver.cpp
     src/PreProcess.cpp
     src/SerialPort.cpp
-    src/main.cpp
     src/UdpLogger.cpp
+    src/main.cpp                   # 或 main_test.cpp
 )
-
-# set(SOURCES
-#     src/Config.cpp
-#     src/CameraDriver.cpp          # 仅相机版需要
-#     src/KalmanTracker.cpp
-#     src/PnPSolver.cpp
-#     src/PreProcess.cpp
-#     src/SerialPort.cpp
-#     src/UdpLogger.cpp
-#     src/main.cpp                   # 或 main_test.cpp
-# )
 
 # 生成可执行文件
 add_executable(${PROJECT_NAME} ${SOURCES})
