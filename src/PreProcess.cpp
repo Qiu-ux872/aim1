@@ -81,6 +81,7 @@ Mat PreProcess::process(const Mat &frame)
     morphologyEx(blur, blur, MORPH_OPEN, kernel);
     morphologyEx(blur, blur, MORPH_CLOSE, kernel);
 
+    imshow("binary", blur);
     return blur;
 }
 

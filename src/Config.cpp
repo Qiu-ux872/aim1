@@ -46,15 +46,24 @@ void Config::loadYaml(const string& file_name){
 
         ballistic.bulletSpeed = node["Ballistic"]["bulletSpeed"].as<float>();
         ballistic.gravity = node["Ballistic"]["gravity"].as<float>();
-        ballistic.cameraOffsetX = node["Ballistic"]["cameraOffsetX"].as<float>();
-        ballistic.cameraOffsetY = node["Ballistic"]["cameraOffsetY"].as<float>();
-        ballistic.cameraOffsetZ = node["Ballistic"]["cameraOffsetZ"].as<float>();
+        ballistic.cameraOffsetX = node["Ballistic"]["camera_offset_x"].as<float>();
+        ballistic.cameraOffsetY = node["Ballistic"]["camera_offset_y"].as<float>();
+        ballistic.cameraOffsetZ = node["Ballistic"]["camera_offset_z"].as<float>();
 
         kalman.processNoisePos = node["kalman"]["processNoisePos"].as<float>();
         kalman.processNoiseVel = node["kalman"]["processNoiseVel"].as<float>();
         kalman.measurementNoisePos = node["kalman"]["measurementNoisePos"].as<float>();
         kalman.initialErrorCov = node["kalman"]["initialErrorCov"].as<float>();
         kalman.angularVelocity = node["kalman"]["angularVelocity"].as<float>();
+        if (node["ballistic"]) {
+            YAML::Node bNode = node["ballistic"];
+            cout << "ballistic 节点内容:" << endl;
+            for (auto it = bNode.begin(); it != bNode.end(); ++it) {
+                string key = it->first.as<string>();
+                string value = it->second.as<string>();
+                cout << "  " << key << " = " << value << endl;
+            }
+        }
 
     } catch (const YAML::Exception& e) {
         cerr << "[Config] Yaml文件加载错误:" << e.what() << endl;

@@ -2,7 +2,7 @@
 camera:
   width: 640
   height: 480
-  fps: 30
+  fps: 60
   exposure: 10000.0
   gain: 10.0
 
@@ -14,34 +14,34 @@ preprocess:
   morph_k_size: 5           # 形态学操作核大小（减小，避免灯条断裂）
   min_area: 70.0            # 灯条最小面积
   max_area: 5000.0          # 灯条最大面积
-  min_ratio: 2.0            # 灯条最小宽高比 
+  min_ratio: 1.8            # 灯条最小宽高比 
   max_ratio: 4.2           # 灯条最大宽高比
   max_angle: 60.0           # 灯条最大偏转角
 
 armor:
-  max_height_diff: 9.0     # 灯条最大高度差
-  min_center_dist: 25.0     # 最小中心距离
+  max_height_diff: 7.5     # 灯条最大高度差
+  min_center_dist: 23.0     # 最小中心距离
   max_center_dist: 280.0     # 最大中心距离
-  max_angle_diff: 50.0      # 最大角度差
+  max_angle_diff: 55.0      # 最大角度差
   min_w_h_ratio: 1.0        # 装甲板最小宽高比
   max_w_h_ratio: 4.0        # 装甲板最大宽高比
   min_center_bar_ratio: 0.9    # 最小中心条比率  
   max_center_bar_ratio: 1.4    # 最大中心条比率
 
-ballistic:
-  bullet_speed: 28.0        # 弹速
+Ballistic:
+  bulletSpeed: 30.0        # 弹速
   gravity: 9.8              # 重力加速度
-  camera_offset_x: 0        # 偏移X
-  camera_offset_y: -40.43      # 偏移Y
-  camera_offset_z: 64.35      # 偏移Z
+  camera_offset_x: 0
+  camera_offset_y: -40.43
+  camera_offset_z: 64.35
 
 kalman:
-  processNoisePos: 0.3       # 位置过程噪声：增大响应变快，抖动；减小轨迹平滑，响应慢
-  processNoiseVel: 0.4         # 速度过程噪声：增大适应快速转动的目标 估计速度波动大；减小适应匀速（0.05 ~ 0.1
+  processNoisePos: 0.35       # 位置过程噪声：增大响应变快，抖动；减小轨迹平滑，响应慢
+  processNoiseVel: 0.5         # 速度过程噪声：增大适应快速转动的目标 估计速度波动大；减小适应匀速（0.05 ~ 0.1)
   measurementNoisePos: 0.3     # 观测噪声：增大依赖模型预测；减小快速跟踪观测量
   initialErrorCov: 1.5          # 初始误差协方差：增大会根据前几次观测修正状态；减小会缓慢修正
   angularVelocity: 7.33         # 水平转速 (rad/s)
 
 serial:
-  port: "/dev/ttyS0"    # 串口名（修正拼写错误）
+  port: "/dev/ttyUSB0"    # 串口名（修正拼写错误）
   baud: 115200            # 波特率

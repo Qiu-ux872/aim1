@@ -107,7 +107,7 @@ int main() {
         cerr << "UDP 初始化失败，将无法发送调试数据" << endl;
     }
 
-    namedWindow("Armor Tracking", WINDOW_AUTOSIZE);
+    namedWindow("Armor Tracking", WINDOW_NORMAL);
 
     double lastTime = getCurrentTimeSec();
     int frameCount = 0;
@@ -119,7 +119,8 @@ int main() {
         double timeStamp = getCurrentTimeSec();
         frameCount++;
 
-        if (timeStamp - lastTime >= 1.0) {
+        
+if (timeStamp - lastTime >= 1.0) {
             fps = frameCount / (timeStamp - lastTime);
             frameCount = 0;
             lastTime = timeStamp;

@@ -175,6 +175,8 @@ AngleSolver::AngleSolver() {
                            config.ballistic.cameraOffsetZ);   // 偏移 Z (mm)
     // Debug
     cout << "偏移x：" << cameraOffset.x << "mm 偏移y：" << cameraOffset.y << "mm 偏移z：" << cameraOffset.z << "mm" << endl;
+    cout << "G:" << gravity << "m/s^2" << endl;
+    cout << "v:" << bulletSpeed << "m/s" << endl;
 }
 
 AimAngle AngleSolver::calculateAimAngle(const PnPResult& pnpResult) {
