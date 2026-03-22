@@ -36,8 +36,8 @@ Ballistic:
   camera_offset_z: 64.35
 
 kalman:
-  processNoisePos: 0.35       # 位置过程噪声：增大响应变快，抖动；减小轨迹平滑，响应慢
-  processNoiseVel: 0.5         # 速度过程噪声：增大适应快速转动的目标 估计速度波动大；减小适应匀速（0.05 ~ 0.1)
+  processNoisePos: 0.3       # 位置过程噪声：增大响应变快，抖动；减小轨迹平滑，响应慢
+  processNoiseVel: 1.5         # 速度过程噪声：增大适应快速转动的目标 估计速度波动大；减小适应匀速（0.05 ~ 0.1)
   measurementNoisePos: 0.3     # 观测噪声：增大依赖模型预测；减小快速跟踪观测量
   initialErrorCov: 1.5          # 初始误差协方差：增大会根据前几次观测修正状态；减小会缓慢修正
   angularVelocity: 7.33         # 水平转速 (rad/s)
