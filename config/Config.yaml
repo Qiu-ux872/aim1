@@ -20,9 +20,9 @@ preprocess:
 
 armor:
   max_height_diff: 7.5     # 灯条最大高度差
-  min_center_dist: 23.0     # 最小中心距离
+  min_center_dist: 70.0     # 最小中心距离
   max_center_dist: 280.0     # 最大中心距离
-  max_angle_diff: 55.0      # 最大角度差
+  max_angle_diff: 75.0      # 最大角度差
   min_w_h_ratio: 1.0        # 装甲板最小宽高比
   max_w_h_ratio: 4.0        # 装甲板最大宽高比
   min_center_bar_ratio: 0.9    # 最小中心条比率  
@@ -37,7 +37,7 @@ Ballistic:
 
 kalman:
   processNoisePos: 0.3       # 位置过程噪声：增大响应变快，抖动；减小轨迹平滑，响应慢
-  processNoiseVel: 1.5         # 速度过程噪声：增大适应快速转动的目标 估计速度波动大；减小适应匀速（0.05 ~ 0.1)
+  processNoiseVel: 2.0         # 速度过程噪声：增大适应快速转动的目标 估计速度波动大；减小适应匀速（0.05 ~ 0.1)
   measurementNoisePos: 0.3     # 观测噪声：增大依赖模型预测；减小快速跟踪观测量
   initialErrorCov: 1.5          # 初始误差协方差：增大会根据前几次观测修正状态；减小会缓慢修正
   angularVelocity: 7.33         # 水平转速 (rad/s)

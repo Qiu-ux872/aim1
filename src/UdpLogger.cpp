@@ -1,4 +1,5 @@
 #include "UdpLogger.hpp"
+#include <cmath>
 
 UdpLogger::UdpLogger(const std::string& host, int port) {
     m_sock = socket(AF_INET, SOCK_DGRAM, 0);
@@ -24,6 +25,12 @@ void UdpLogger::send(double timestamp,
                      double est_x, double est_y, double est_z,
                      double pred_x, double pred_y, double pred_z) {
     if (m_sock == -1) return;
+
+    // 安全替换 NaN 或 Inf 为 0
+    auto safe = [](double v) -> double {
+        return (std::isnan(v) || std::isinf(v)) ? 0.0 : v;
+    };
+
     std::stringstream ss;
     ss << "{"
        << "\"timestamp\":" << timestamp << ","
