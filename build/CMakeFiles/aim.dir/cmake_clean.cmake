@@ -1,6 +1,4 @@
 file(REMOVE_RECURSE
-  "../bin/aim"
-  "../bin/aim.pdb"
   "CMakeFiles/aim.dir/src/CameraDriver.cpp.o"
   "CMakeFiles/aim.dir/src/CameraDriver.cpp.o.d"
   "CMakeFiles/aim.dir/src/Config.cpp.o"
@@ -17,6 +15,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/aim.dir/src/UdpLogger.cpp.o.d"
   "CMakeFiles/aim.dir/src/main.cpp.o"
   "CMakeFiles/aim.dir/src/main.cpp.o.d"
+  "aim"
+  "aim.pdb"
 )
 
 # Per-language clean rules from dependency scanning.

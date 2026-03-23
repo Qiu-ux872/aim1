@@ -12,7 +12,7 @@ preprocess:
   rdc_exposure_x: 0.35       # 降曝光参数1（保持对比度）
   rdc_exposure_y: -70.0       # 降曝光参数2（不改变亮度）
   morph_k_size: 5           # 形态学操作核大小（减小，避免灯条断裂）
-  min_area: 70.0            # 灯条最小面积
+  min_area: 80.0            # 灯条最小面积
   max_area: 5000.0          # 灯条最大面积
   min_ratio: 1.8            # 灯条最小宽高比 
   max_ratio: 4.2           # 灯条最大宽高比
@@ -45,3 +45,8 @@ kalman:
 serial:
   port: "/dev/ttyUSB0"    # 串口名（修正拼写错误）
   baud: 115200            # 波特率
+
+udp:
+  enabled: true               # 是否启用 UDP 发送
+  host: "192.168.1.100"       # 接收端 IP（Ubuntu 机器的 IP）
+  port: 9870                  # 端口号，与 PlotJuggler 设置的端口一致

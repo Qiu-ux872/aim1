@@ -40,7 +40,6 @@ bool loadCameraParams(const string& filename, Mat& cameraMatrix, Mat& distCoeffs
         return false;
     }
 
-    // 读取相机内参矩阵
     fs["camera_matrix"] >> cameraMatrix;
     if (cameraMatrix.empty() || cameraMatrix.rows != 3 || cameraMatrix.cols != 3) {
         cerr << "【警告】文件中没有有效的 camera_matrix，将使用默认内参！" << endl;
@@ -50,13 +49,11 @@ bool loadCameraParams(const string& filename, Mat& cameraMatrix, Mat& distCoeffs
         return false;
     }
 
-    // 读取畸变系数
     fs["dist_coeffs"] >> distCoeffs;
     if (distCoeffs.empty()) {
         cerr << "【警告】文件中没有有效的 dist_coeffs，将使用零向量！" << endl;
         distCoeffs = Mat::zeros(5, 1, CV_64F);
     } else {
-        // 确保为列向量
         if (distCoeffs.rows == 1 && distCoeffs.cols > 1) {
             distCoeffs = distCoeffs.reshape(1, distCoeffs.cols);
         } else if (distCoeffs.cols != 1 || distCoeffs.rows < 4) {
@@ -65,14 +62,12 @@ bool loadCameraParams(const string& filename, Mat& cameraMatrix, Mat& distCoeffs
         }
     }
 
-    // 赋值给 PreProcess 静态成员，供 detectArmors 中的投影使用
     PreProcess::camera_matrix = cameraMatrix.clone();
     PreProcess::dist_coeffs = distCoeffs.clone();
     cout << "相机参数加载成功！" << endl;
     return true;
 }
 
-// 三参数投影函数（带畸变系数）
 Point2f projectPoint(const Point3f& pt, const Mat& cameraMatrix, const Mat& distCoeffs) {
     vector<Point3f> pts3d = {pt};
     vector<Point2f> pts2d;
@@ -111,9 +106,18 @@ int main() {
         cerr << "串口打开失败，将无法发送角度" << endl;
     }
 
-    UdpLogger udpLogger("127.0.0.1", 9870);
-    if (!udpLogger.isOpen()) {
-        cerr << "UDP 初始化失败，将无法发送调试数据" << endl;
+    // 根据配置创建 UDP Logger
+    unique_ptr<UdpLogger> udpLogger;
+    if (Config::get().udp.enabled) {
+        udpLogger = make_unique<UdpLogger>(Config::get().udp.host, Config::get().udp.port);
+        if (!udpLogger->isOpen()) {
+            cerr << "UDP 初始化失败，将无法发送调试数据" << endl;
+            udpLogger.reset();
+        } else {
+            cout << "UDP 已启用，目标 " << Config::get().udp.host << ":" << Config::get().udp.port << endl;
+        }
+    } else {
+        cout << "UDP 发送已禁用" << endl;
     }
 
     namedWindow("Armor Tracking", WINDOW_AUTOSIZE);
@@ -122,7 +126,7 @@ int main() {
     int frameCount = 0;
     double fps = 0.0;
 
-    Point3f predPos(0, 0, 0); // 预测位置，用于卡尔曼辅助筛选
+    Point3f predPos(0, 0, 0);
 
     while (true) {
         double timeStamp = getCurrentTimeSec();
@@ -143,7 +147,6 @@ int main() {
         Mat binary = PreProcess::process(frame);
         vector<LightBar> lightBars = PreProcess::detectLightBars(binary);
 
-        // 匹配装甲板，传入卡尔曼预测位置以辅助筛选
         vector<Armor> armors;
         if (tracker.isInitialized()) {
             armors = PreProcess::detectArmors(lightBars, &predPos);
@@ -213,8 +216,8 @@ int main() {
         }
 
         // UDP 发送到 PlotJuggler
-        if (udpLogger.isOpen()) {
-            udpLogger.send(
+        if (udpLogger && udpLogger->isOpen()) {
+            udpLogger->send(
                 timeStamp,
                 pnpRes.isValid ? pnpRes.distance : 0.0,
                 pnpRes.isValid ? pnpRes.yaw : 0.0,
@@ -226,7 +229,7 @@ int main() {
             );
         }
 
-        // 绘制卡尔曼滤波点（使用三参数投影）
+        // 绘制卡尔曼滤波点
         if (tracker.isInitialized()) {
             if (hasTarget) {
                 Point2f ptMeas = projectPoint(measuredPos, cameraMatrix, distCoeffs);
@@ -238,7 +241,7 @@ int main() {
             circle(frame, ptPred, 5, Scalar(0, 0, 255), -1);
         }
 
-        // 绘制卡尔曼估计的装甲板框（黄色，使用三参数投影）
+        // 绘制卡尔曼估计的装甲板框（黄色）
         if (tracker.isInitialized()) {
             const float armorWidth = 135.0f;
             const float armorHeight = 125.0f;
@@ -261,6 +264,7 @@ int main() {
             polylines(frame, intPts, true, Scalar(0, 255, 255), 2);
         }
 
+        // 在画面左上角显示 PnP 解算结果
         if (pnpRes.isValid) {
             string posText = format("X:%.1f Y:%.1f Z:%.1f", pnpRes.position.x, pnpRes.position.y, pnpRes.position.z);
             putText(frame, posText, Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1, LINE_AA);
@@ -270,7 +274,6 @@ int main() {
             putText(frame, "No Target", Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1, LINE_AA);
         }
 
-        // 显示帧率和图像
         string windowName = "Armor Tracking - FPS: " + to_string((int)fps);
         setWindowTitle("Armor Tracking", windowName);
         imshow("Armor Tracking", frame);

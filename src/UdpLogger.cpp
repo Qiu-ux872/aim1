@@ -1,5 +1,4 @@
 #include "UdpLogger.hpp"
-#include <cmath>
 
 UdpLogger::UdpLogger(const std::string& host, int port) {
     m_sock = socket(AF_INET, SOCK_DGRAM, 0);
@@ -7,15 +6,31 @@ UdpLogger::UdpLogger(const std::string& host, int port) {
         std::cerr << "[UDP] 创建socket失败" << std::endl;
         return;
     }
+
     memset(&m_addr, 0, sizeof(m_addr));
     m_addr.sin_family = AF_INET;
     m_addr.sin_port = htons(port);
-    m_addr.sin_addr.s_addr = inet_addr(host.c_str());
+    if (inet_pton(AF_INET, host.c_str(), &m_addr.sin_addr) <= 0) {
+        std::cerr << "[UDP] 无效的IP地址: " << host << std::endl;
+        close(m_sock);
+        m_sock = -1;
+        return;
+    }
     m_addr_len = sizeof(m_addr);
+    std::cout << "[UDP] 目标 " << host << ":" << port << " 已设置" << std::endl;
 }
 
 UdpLogger::~UdpLogger() {
     if (m_sock != -1) close(m_sock);
+}
+
+double UdpLogger::safeDouble(double v) {
+    // 处理 NaN
+    if (v != v) return 0.0;
+    // 处理无穷大
+    if (v == std::numeric_limits<double>::infinity() ||
+        v == -std::numeric_limits<double>::infinity()) return 0.0;
+    return v;
 }
 
 void UdpLogger::send(double timestamp,
@@ -26,27 +41,29 @@ void UdpLogger::send(double timestamp,
                      double pred_x, double pred_y, double pred_z) {
     if (m_sock == -1) return;
 
-    // 安全替换 NaN 或 Inf 为 0
-    auto safe = [](double v) -> double {
-        return (std::isnan(v) || std::isinf(v)) ? 0.0 : v;
-    };
-
     std::stringstream ss;
     ss << "{"
-       << "\"timestamp\":" << timestamp << ","
-       << "\"pnp_distance\":" << pnp_distance << ","
-       << "\"pnp_yaw\":" << pnp_yaw << ","
-       << "\"pnp_pitch\":" << pnp_pitch << ","
-       << "\"pnp_roll\":" << pnp_roll << ","
-       << "\"aim_yaw\":" << aim_yaw << ","
-       << "\"aim_pitch\":" << aim_pitch << ","
-       << "\"est_x\":" << est_x << ","
-       << "\"est_y\":" << est_y << ","
-       << "\"est_z\":" << est_z << ","
-       << "\"pred_x\":" << pred_x << ","
-       << "\"pred_y\":" << pred_y << ","
-       << "\"pred_z\":" << pred_z
+       << "\"timestamp\":" << safeDouble(timestamp) << ","
+       << "\"pnp_distance\":" << safeDouble(pnp_distance) << ","
+       << "\"pnp_yaw\":" << safeDouble(pnp_yaw) << ","
+       << "\"pnp_pitch\":" << safeDouble(pnp_pitch) << ","
+       << "\"pnp_roll\":" << safeDouble(pnp_roll) << ","
+       << "\"aim_yaw\":" << safeDouble(aim_yaw) << ","
+       << "\"aim_pitch\":" << safeDouble(aim_pitch) << ","
+       << "\"est_x\":" << safeDouble(est_x) << ","
+       << "\"est_y\":" << safeDouble(est_y) << ","
+       << "\"est_z\":" << safeDouble(est_z) << ","
+       << "\"pred_x\":" << safeDouble(pred_x) << ","
+       << "\"pred_y\":" << safeDouble(pred_y) << ","
+       << "\"pred_z\":" << safeDouble(pred_z)
        << "}";
+
+    // ===========Debug===========
+    static int count = 0;
+    if (++count % 30 == 0) {
+        std::cout << "[UDP] " << ss.str() << std::endl;
+    }
+
     sendJson(ss.str());
 }
 

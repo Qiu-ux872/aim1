@@ -7,7 +7,6 @@ Config& Config::get(){
 }
 
 Config::Config(){
-    
     loadYaml("config/Config.yaml");
 }
 
@@ -44,25 +43,24 @@ void Config::loadYaml(const string& file_name){
         armor.max_center_bar_ratio = node["armor"]["max_center_bar_ratio"].as<float>();
         armor.min_center_bar_ratio = node["armor"]["min_center_bar_ratio"].as<float>();
 
-        ballistic.bulletSpeed = node["Ballistic"]["bulletSpeed"].as<float>();
-        ballistic.gravity = node["Ballistic"]["gravity"].as<float>();
-        ballistic.cameraOffsetX = node["Ballistic"]["camera_offset_x"].as<float>();
-        ballistic.cameraOffsetY = node["Ballistic"]["camera_offset_y"].as<float>();
-        ballistic.cameraOffsetZ = node["Ballistic"]["camera_offset_z"].as<float>();
+        // 读取 ballistic 节点（注意节点名与 YAML 一致，这里使用小写）
+        ballistic.bulletSpeed = node["ballistic"]["bulletSpeed"].as<float>();
+        ballistic.gravity = node["ballistic"]["gravity"].as<float>();
+        ballistic.cameraOffsetX = node["ballistic"]["camera_offset_x"].as<float>();
+        ballistic.cameraOffsetY = node["ballistic"]["camera_offset_y"].as<float>();
+        ballistic.cameraOffsetZ = node["ballistic"]["camera_offset_z"].as<float>();
 
         kalman.processNoisePos = node["kalman"]["processNoisePos"].as<float>();
         kalman.processNoiseVel = node["kalman"]["processNoiseVel"].as<float>();
         kalman.measurementNoisePos = node["kalman"]["measurementNoisePos"].as<float>();
         kalman.initialErrorCov = node["kalman"]["initialErrorCov"].as<float>();
         kalman.angularVelocity = node["kalman"]["angularVelocity"].as<float>();
-        if (node["ballistic"]) {
-            YAML::Node bNode = node["ballistic"];
-            cout << "ballistic 节点内容:" << endl;
-            for (auto it = bNode.begin(); it != bNode.end(); ++it) {
-                string key = it->first.as<string>();
-                string value = it->second.as<string>();
-                cout << "  " << key << " = " << value << endl;
-            }
+
+        // 读取 UDP 配置
+        if (node["udp"]) {
+            udp.enabled = node["udp"]["enabled"].as<bool>();
+            udp.host = node["udp"]["host"].as<string>();
+            udp.port = node["udp"]["port"].as<int>();
         }
 
     } catch (const YAML::Exception& e) {

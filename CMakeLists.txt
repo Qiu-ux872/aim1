@@ -1,31 +1,31 @@
 cmake_minimum_required(VERSION 3.10)
 project(aim)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # 查找依赖包
 find_package(OpenCV REQUIRED)
 find_package(yaml-cpp REQUIRED)
 
-# 设置头文件目录
+# 包含头文件目录
 include_directories(
     ${CMAKE_SOURCE_DIR}/include
     ${OpenCV_INCLUDE_DIRS}
+    ${YAML_CPP_INCLUDE_DIRS}
+    ${CMAKE_SOURCE_DIR}/MindVisionSdk
 )
 
-include_directories(${CMAKE_SOURCE_DIR}/MindVisionSdk)
-
-# 收集源文件
+# 收集所有源文件
 set(SOURCES
     src/Config.cpp
-    src/CameraDriver.cpp          # 仅相机版需要
+    src/CameraDriver.cpp
     src/KalmanTracker.cpp
     src/PnPSolver.cpp
     src/PreProcess.cpp
     src/SerialPort.cpp
     src/UdpLogger.cpp
-    src/main.cpp                   # 或 main_test.cpp
+    src/main.cpp
 )
 
 # 生成可执行文件
@@ -35,9 +35,6 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 target_link_libraries(${PROJECT_NAME}
     ${OpenCV_LIBS}
     ${YAML_CPP_LIBRARIES}
-    ${CMAKE_SOURCE_DIR}/MindVisionSdk/lib/x64/libMVSDK.so
+    ${CMAKE_SOURCE_DIR}/MindVisionSdk/lib/x64/libMVSDK.so   # 根据实际 SDK 库路径修改
     pthread
 )
-
-# 设置运行时输出目录
-set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)

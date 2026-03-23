@@ -62,6 +62,13 @@ struct KalmanConfig{
     float angularVelocity = 7.33f;     // 水平转速 (rad/s)，用于参考
 };
 
+// 新增 UDP 配置结构体
+struct UdpConfig{
+    bool enabled = false;
+    string host = "127.0.0.1";
+    int port = 9870;
+};
+
 class Config{
 public:
     //获取单例实例
@@ -78,6 +85,7 @@ public:
     ArmorConfig armor;
     Ballistic ballistic;
     KalmanConfig kalman;
+    UdpConfig udp;
 
 private:
     Config();

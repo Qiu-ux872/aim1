@@ -6,5 +6,5 @@ CXX_DEFINES =
 
 CXX_INCLUDES = -I/home/qiu/桌面/aim/include -I/home/qiu/桌面/aim/MindVisionSdk -isystem /usr/local/include/opencv4
 
-CXX_FLAGS = -std=gnu++11
+CXX_FLAGS = -std=gnu++14
 
