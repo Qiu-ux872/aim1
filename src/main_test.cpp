@@ -81,7 +81,7 @@ int main() {
     Mat cameraMatrix, distCoeffs;
     loadCameraParams("config/calibration.yml", cameraMatrix, distCoeffs);
 
-    string videoPath = "data/blue1.mp4";
+    string videoPath = "/home/qiu/桌面/aim/data/blue.mp4";
     VideoCapture cap(videoPath);
     if (!cap.isOpened()) {
         cerr << "无法打开视频文件: " << videoPath << endl;
@@ -119,8 +119,7 @@ int main() {
         double timeStamp = getCurrentTimeSec();
         frameCount++;
 
-        
-if (timeStamp - lastTime >= 1.0) {
+        if (timeStamp - lastTime >= 1.0) {
             fps = frameCount / (timeStamp - lastTime);
             frameCount = 0;
             lastTime = timeStamp;
@@ -155,6 +154,9 @@ if (timeStamp - lastTime >= 1.0) {
             if (pnpRes.isValid) {
                 hasTarget = true;
                 measuredPos = pnpRes.position;
+
+                double filteredYaw = tracker.updateYaw(pnpRes.yaw, timeStamp);
+                double predictedYaw = tracker.predictYaw(timeStamp);
 
                 const auto& pts = target.armor_pts;
                 for (int i = 0; i < 4; i++) {
@@ -253,11 +255,14 @@ if (timeStamp - lastTime >= 1.0) {
             polylines(frame, intPts, true, Scalar(0, 255, 255), 2);
         }
 
+        // 在画面左上角显示解算结果
         if (pnpRes.isValid) {
             string text = format("X:%.1f Y:%.1f Z:%.1f", pnpRes.position.x, pnpRes.position.y, pnpRes.position.z);
             putText(frame, text, Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1, LINE_AA);
-            text = format("Yaw:%.2f Pitch:%.2f", pnpRes.yaw, pnpRes.pitch);
-            putText(frame, text, Point(10, 50), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1, LINE_AA);
+            string angleText = format("Yaw: %.2f (raw) / %.2f (filt) / %.2f (pred)", pnpRes.yaw, pnpRes.filteredYaw, pnpRes.predictedYaw);
+            putText(frame, angleText, Point(10, 50), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1, LINE_AA);
+            string angleText2 = format("Pitch:%.2f Roll:%.2f", pnpRes.pitch, pnpRes.roll);
+            putText(frame, angleText2, Point(10, 70), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1, LINE_AA);
         } else {
             putText(frame, "No Target", Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1, LINE_AA);
         }

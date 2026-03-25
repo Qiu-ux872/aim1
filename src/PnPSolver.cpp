@@ -47,7 +47,7 @@ bool PnPSolver::loadCameraParams(const string& filename) {
     }
 
     // 尝试多种键名读取畸变系数
-    vector<string> distKeys = {"dist_coeffs", "distCoeffs"};
+    vector<string> distKeys = {"dist_coeffs", "distortion_coeffs"};
     for (const auto& key : distKeys) {
         fs[key] >> tmpDist;
         if (!tmpDist.empty()) break;
@@ -119,7 +119,7 @@ PnPResult PnPSolver::solvePnP(const vector<Point2f>& imagePoints) {
                                result.translationVec.at<double>(1),
                                result.translationVec.at<double>(2));
                                
-    // Debug
+    // ===============================Debug===================================
     cout << "PnP解算成功！距离: " << result.distance << " mm" << endl;
 
     // 计算重投影误差
@@ -162,7 +162,7 @@ void PnPSolver::calculateEulerAngles(PnPResult& result) {
     result.pitch *= rad2deg;
     result.roll  *= rad2deg;
 
-    // Debug
+    // ============================Debug============================
     cout << "PnP欧拉角(度): yaw=" << result.yaw << ", pitch=" << result.pitch << ", roll=" << result.roll << endl;
 }
 
@@ -173,7 +173,7 @@ AngleSolver::AngleSolver() {
     cameraOffset = Point3f(config.ballistic.cameraOffsetX,    // 偏移 X (mm)
                            config.ballistic.cameraOffsetY,    // 偏移 Y (mm)
                            config.ballistic.cameraOffsetZ);   // 偏移 Z (mm)
-    // Debug
+    // ============================Debug=============================
     cout << "偏移x：" << cameraOffset.x << "mm 偏移y：" << cameraOffset.y << "mm 偏移z：" << cameraOffset.z << "mm" << endl;
     cout << "G:" << gravity << "m/s^2" << endl;
     cout << "v:" << bulletSpeed << "m/s" << endl;
@@ -205,16 +205,16 @@ AimAngle AngleSolver::calculateAimAngle(const PnPResult& pnpResult) {
     aim.yaw   = yaw_rad * rad2deg;
     aim.pitch = pitch_rad * rad2deg;
 
-    // Debug重力补偿后（输出角度）
+    // ==========================Debug========================
     cout << "重力补偿后yaw:" << aim.yaw << "° pitch:" << aim.pitch << "°" << endl;
 
-    // 飞行时间（仍用弧度计算）
+    // 飞行时间 弧度计算
     if (bulletSpeed > 0 && aim.pitch != 0) {
-        aim.flyTime = dz / (bulletSpeed * cos(pitch_rad)); // cos 需传入弧度
+        aim.flyTime = dz / (bulletSpeed * cos(pitch_rad));
     } else {
         aim.flyTime = 0;
     }
-
+    
     return aim;
 }
 

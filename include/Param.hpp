@@ -33,6 +33,8 @@ struct PnPResult {
     double yaw;                    // yaw（弧度）
     double pitch;                  // pitch（弧度）
     double roll;                   // roll（弧度）
+    double filteredYaw;
+    double predictedYaw;
     bool isValid;                  // 是否有效
     double reprojectionError;      // 重投影误差
 };

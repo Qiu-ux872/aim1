@@ -4,7 +4,7 @@
 
 Mat PreProcess::camera_matrix;
 Mat PreProcess::dist_coeffs;
-extern Point2f projectPoint(const Point3f& pt, const Mat& cameraMatrix, const Mat& distCoeffs);
+extern Point2f projectPoint(const Point3f &pt, const Mat &cameraMatrix, const Mat &distCoeffs);
 
 // 排列角点 - 基于坐标对比（按 y 排序再按 x 排序）
 vector<Point2f> sortCorners(const RotatedRect &rect)
@@ -25,14 +25,13 @@ vector<Point2f> sortCorners(const RotatedRect &rect)
     vector<Point2f> top = {pts[0], pts[1]};
     vector<Point2f> bottom = {pts[2], pts[3]};
 
-    // 在上排中按 x 排序（左到右）
+    // 在上排中按 x 排序
     sort(top.begin(), top.end(), [](const Point2f &a, const Point2f &b)
          { return a.x < b.x; });
     // 在下排中按 x 排序
     sort(bottom.begin(), bottom.end(), [](const Point2f &a, const Point2f &b)
          { return a.x < b.x; });
 
-    // 组装结果：左上、右上、右下、左下
     vector<Point2f> sorted(4);
     sorted[0] = top[0];    // 左上
     sorted[1] = top[1];    // 右上
@@ -173,30 +172,26 @@ vector<Point2f> PreProcess::calculateArmorCorners(const Armor &armor)
 {
     vector<Point2f> corners(4);
 
-    // 收集装甲板的四个关键角点：左灯条的左上、左下 和 右灯条的右上、右下
-    // 假设左右灯条的 bar_pts 已通过 sortCorners 排序为 [左上, 右上, 右下, 左下]
     vector<Point2f> allPts;
     allPts.push_back(armor.left.bar_pts[0]);  // 左灯条左上
     allPts.push_back(armor.left.bar_pts[3]);  // 左灯条左下
     allPts.push_back(armor.right.bar_pts[1]); // 右灯条右上
     allPts.push_back(armor.right.bar_pts[2]); // 右灯条右下
 
-    // 按 y 坐标升序排序，y 小的为上排
+    // 按 y 坐标升序排序
     sort(allPts.begin(), allPts.end(), [](const Point2f &a, const Point2f &b)
          { return a.y < b.y; });
 
-    // 前两个点为上排，后两个点为下排
     vector<Point2f> top(allPts.begin(), allPts.begin() + 2);
     vector<Point2f> bottom(allPts.begin() + 2, allPts.end());
 
-    // 上排按 x 升序（左到右）
+    // 上排按 x 升序
     sort(top.begin(), top.end(), [](const Point2f &a, const Point2f &b)
          { return a.x < b.x; });
     // 下排按 x 升序
     sort(bottom.begin(), bottom.end(), [](const Point2f &a, const Point2f &b)
          { return a.x < b.x; });
 
-    // 组装顺序：左上、右上、右下、左下
     corners[0] = top[0];
     corners[1] = top[1];
     corners[2] = bottom[1];
@@ -205,7 +200,7 @@ vector<Point2f> PreProcess::calculateArmorCorners(const Armor &armor)
     return corners;
 }
 
-vector<Armor> PreProcess::detectArmors(const vector<LightBar>& detected_bars, const Point3f* predictedPos)   // 注意：这里不要写默认参数
+vector<Armor> PreProcess::detectArmors(const vector<LightBar> &detected_bars, const Point3f *predictedPos)
 {
     Config &c = Config::get();
     vector<Armor> armors;
@@ -215,7 +210,7 @@ vector<Armor> PreProcess::detectArmors(const vector<LightBar>& detected_bars, co
         return armors;
     }
 
-    // 遍历所有可能的灯条
+    // 遍历灯条
     for (size_t i = 0; i < detected_bars.size(); i++)
     {
         for (size_t j = i + 1; j < detected_bars.size(); j++)
@@ -278,7 +273,7 @@ vector<Armor> PreProcess::detectArmors(const vector<LightBar>& detected_bars, co
         }
     }
 
-    // 卡尔曼稳定识别：如果提供了预测位置，选择最接近的装甲板
+    // 卡尔曼稳定识别
     if (predictedPos != nullptr && !armors.empty() && !PreProcess::camera_matrix.empty())
     {
         Point2f predImg = projectPoint(*predictedPos, PreProcess::camera_matrix, PreProcess::dist_coeffs);

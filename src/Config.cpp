@@ -55,6 +55,9 @@ void Config::loadYaml(const string& file_name){
         kalman.measurementNoisePos = node["kalman"]["measurementNoisePos"].as<float>();
         kalman.initialErrorCov = node["kalman"]["initialErrorCov"].as<float>();
         kalman.angularVelocity = node["kalman"]["angularVelocity"].as<float>();
+        kalman.yawProcessNoisePos = node["kalman"]["yawProcessNoisePos"].as<float>();
+        kalman.yawProcessNoiseVel = node["kalman"]["yawProcessNoiseVel"].as<float>();
+        kalman.yawMeasurementNoise = node["kalman"]["yawMeasurementNoise"].as<float>();
 
         // 读取 UDP 配置
         if (node["udp"]) {

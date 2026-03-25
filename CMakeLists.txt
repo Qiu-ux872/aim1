@@ -4,6 +4,9 @@ project(aim)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# 设置可执行文件输出目录为项目根目录下的 bin
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+
 # 查找依赖包
 find_package(OpenCV REQUIRED)
 find_package(yaml-cpp REQUIRED)
@@ -25,7 +28,7 @@ set(SOURCES
     src/PreProcess.cpp
     src/SerialPort.cpp
     src/UdpLogger.cpp
-    src/main.cpp
+    src/main_test.cpp
 )
 
 # 生成可执行文件
@@ -35,6 +38,6 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 target_link_libraries(${PROJECT_NAME}
     ${OpenCV_LIBS}
     ${YAML_CPP_LIBRARIES}
-    ${CMAKE_SOURCE_DIR}/MindVisionSdk/lib/x64/libMVSDK.so   # 根据实际 SDK 库路径修改
+    ${CMAKE_SOURCE_DIR}/MindVisionSdk/lib/x64/libMVSDK.so
     pthread
 )

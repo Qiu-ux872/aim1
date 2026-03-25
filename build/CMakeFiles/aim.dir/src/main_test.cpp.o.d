@@ -1,5 +1,6 @@
-CMakeFiles/aim.dir/src/main.cpp.o: /home/qiu/桌面/aim/src/main.cpp \
- /usr/include/stdc-predef.h /usr/include/c++/11/iostream \
+CMakeFiles/aim.dir/src/main_test.cpp.o: \
+ /home/qiu/桌面/aim/src/main_test.cpp /usr/include/stdc-predef.h \
+ /usr/include/c++/11/iostream \
  /usr/include/x86_64-linux-gnu/c++/11/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/11/bits/os_defines.h \
  /usr/include/features.h /usr/include/features-time64.h \
@@ -288,7 +289,8 @@ CMakeFiles/aim.dir/src/main.cpp.o: /home/qiu/桌面/aim/src/main.cpp \
  /usr/include/x86_64-linux-gnu/c++/11/bits/messages_members.h \
  /usr/include/libintl.h /usr/include/c++/11/bits/codecvt.h \
  /usr/include/c++/11/bits/locale_facets_nonio.tcc \
- /usr/include/c++/11/bits/locale_conv.h /usr/include/c++/11/math.h \
+ /usr/include/c++/11/bits/locale_conv.h \
+ /usr/include/c++/11/bits/quoted_string.h /usr/include/c++/11/math.h \
  /usr/local/include/opencv4/opencv2/flann/autotuned_index.h \
  /usr/local/include/opencv4/opencv2/flann/ground_truth.h \
  /usr/local/include/opencv4/opencv2/flann/index_testing.h \
@@ -354,8 +356,6 @@ CMakeFiles/aim.dir/src/main.cpp.o: /home/qiu/桌面/aim/src/main.cpp \
  /usr/include/yaml-cpp/node/convert.h \
  /usr/include/yaml-cpp/node/detail/impl.h \
  /usr/include/yaml-cpp/node/parse.h /usr/include/yaml-cpp/node/emit.h \
- /home/qiu/桌面/aim/include/CameraDriver.hpp /usr/include/CameraApi.h \
- /usr/include/CameraDefine.h /usr/include/CameraStatus.h \
  /home/qiu/桌面/aim/include/PreProcess.hpp \
  /home/qiu/桌面/aim/include/Param.hpp \
  /home/qiu/桌面/aim/include/PnPSolver.hpp \

@@ -11,34 +11,42 @@ class KalmanTracker{
 public:
     KalmanTracker();
 
-    // 初始化状态（第一次观测到目标时调用）
+    // 原位置滤波器接口
     void init(const Point3f& position, double timeStamp);
-
-    // 预测下一时间位置
     Point3f predict(double timeStamp);
-
-    // 更新滤波器 (传入当前观测)
     Point3f update(const Point3f measuredPos, double timeStamp);
-
-    // 获取当前最优估计的位置
     Point3f getEstimatedPosition() const;
-
-    // 获取预测的下一时刻位置（用于绘制）
     Point3f getPredictionPosition() const { return m_predictedPose; }
+    bool isInitialized() const { return m_initialized; }
 
-    // 检查是否已初始化
-    bool isInitialized() const { return m_initialized; }    
+    // ========== 新增：yaw 滤波器接口 ==========
+    void initYaw(double yaw, double timeStamp);
+    double predictYaw(double timeStamp);
+    double updateYaw(double measuredYaw, double timeStamp);
+    double getEstimatedYaw() const;
+    double getPredictedYaw() const { return m_predictedYaw; }
+    bool isYawInitialized() const { return m_yawInitialized; }
+    // =======================================
 
 private:
-    KalmanFilter m_kf;          // 卡尔曼滤波器对象 (6维状态，3维观测)
-    Mat m_state;                // 状态向量（6x1）
-    Mat m_measured;             // 观测向量（3x1）
-    double m_lastTime;          // 上一帧时间戳（s）
-    double m_dt;                // 时间间隔（s）
-    Point3f m_predictedPose;    // 预测位置（用于绘制）
-    bool m_initialized;         // 是否已初始化
+    // 位置滤波器成员
+    KalmanFilter m_kf;          // 6维状态，3维观测
+    Mat m_state;
+    Mat m_measured;
+    double m_lastTime;
+    double m_dt;
+    Point3f m_predictedPose;
+    bool m_initialized;
 
     void setTransitionMatrix(double dt);
     void loadParamInConfig();
 
+    KalmanFilter m_kfYaw;
+    double m_lastYawTime;
+    double m_dtYaw;
+    double m_predictedYaw;
+    bool m_yawInitialized;
+
+    void setYawTransitionMatrix(double dt);
+    void loadYawParamsFromConfig();
 };

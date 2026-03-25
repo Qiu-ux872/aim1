@@ -60,6 +60,9 @@ struct KalmanConfig{
     float measurementNoisePos = 1e-2f; // 观测噪声
     float initialErrorCov = 1.0f;      // 初始误差协方差
     float angularVelocity = 7.33f;     // 水平转速 (rad/s)，用于参考
+    float yawProcessNoisePos = 1e-2f;   // 角度过程噪声
+    float yawProcessNoiseVel = 1e-1f;   // 角速度过程噪声
+    float yawMeasurementNoise = 1e-1f;  // 观测噪声
 };
 
 // 新增 UDP 配置结构体

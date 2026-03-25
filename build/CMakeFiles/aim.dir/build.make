@@ -167,19 +167,19 @@ CMakeFiles/aim.dir/src/UdpLogger.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/aim.dir/src/UdpLogger.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/qiu/桌面/aim/src/UdpLogger.cpp -o CMakeFiles/aim.dir/src/UdpLogger.cpp.s
 
-CMakeFiles/aim.dir/src/main.cpp.o: CMakeFiles/aim.dir/flags.make
-CMakeFiles/aim.dir/src/main.cpp.o: ../src/main.cpp
-CMakeFiles/aim.dir/src/main.cpp.o: CMakeFiles/aim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/qiu/桌面/aim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/aim.dir/src/main.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/aim.dir/src/main.cpp.o -MF CMakeFiles/aim.dir/src/main.cpp.o.d -o CMakeFiles/aim.dir/src/main.cpp.o -c /home/qiu/桌面/aim/src/main.cpp
+CMakeFiles/aim.dir/src/main_test.cpp.o: CMakeFiles/aim.dir/flags.make
+CMakeFiles/aim.dir/src/main_test.cpp.o: ../src/main_test.cpp
+CMakeFiles/aim.dir/src/main_test.cpp.o: CMakeFiles/aim.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/qiu/桌面/aim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/aim.dir/src/main_test.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/aim.dir/src/main_test.cpp.o -MF CMakeFiles/aim.dir/src/main_test.cpp.o.d -o CMakeFiles/aim.dir/src/main_test.cpp.o -c /home/qiu/桌面/aim/src/main_test.cpp
 
-CMakeFiles/aim.dir/src/main.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/aim.dir/src/main.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/qiu/桌面/aim/src/main.cpp > CMakeFiles/aim.dir/src/main.cpp.i
+CMakeFiles/aim.dir/src/main_test.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/aim.dir/src/main_test.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/qiu/桌面/aim/src/main_test.cpp > CMakeFiles/aim.dir/src/main_test.cpp.i
 
-CMakeFiles/aim.dir/src/main.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/aim.dir/src/main.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/qiu/桌面/aim/src/main.cpp -o CMakeFiles/aim.dir/src/main.cpp.s
+CMakeFiles/aim.dir/src/main_test.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/aim.dir/src/main_test.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/qiu/桌面/aim/src/main_test.cpp -o CMakeFiles/aim.dir/src/main_test.cpp.s
 
 # Object files for target aim
 aim_OBJECTS = \
@@ -190,43 +190,43 @@ aim_OBJECTS = \
 "CMakeFiles/aim.dir/src/PreProcess.cpp.o" \
 "CMakeFiles/aim.dir/src/SerialPort.cpp.o" \
 "CMakeFiles/aim.dir/src/UdpLogger.cpp.o" \
-"CMakeFiles/aim.dir/src/main.cpp.o"
+"CMakeFiles/aim.dir/src/main_test.cpp.o"
 
 # External object files for target aim
 aim_EXTERNAL_OBJECTS =
 
-aim: CMakeFiles/aim.dir/src/Config.cpp.o
-aim: CMakeFiles/aim.dir/src/CameraDriver.cpp.o
-aim: CMakeFiles/aim.dir/src/KalmanTracker.cpp.o
-aim: CMakeFiles/aim.dir/src/PnPSolver.cpp.o
-aim: CMakeFiles/aim.dir/src/PreProcess.cpp.o
-aim: CMakeFiles/aim.dir/src/SerialPort.cpp.o
-aim: CMakeFiles/aim.dir/src/UdpLogger.cpp.o
-aim: CMakeFiles/aim.dir/src/main.cpp.o
-aim: CMakeFiles/aim.dir/build.make
-aim: /usr/local/lib/libopencv_gapi.so.4.6.0
-aim: /usr/local/lib/libopencv_highgui.so.4.6.0
-aim: /usr/local/lib/libopencv_ml.so.4.6.0
-aim: /usr/local/lib/libopencv_objdetect.so.4.6.0
-aim: /usr/local/lib/libopencv_photo.so.4.6.0
-aim: /usr/local/lib/libopencv_stitching.so.4.6.0
-aim: /usr/local/lib/libopencv_video.so.4.6.0
-aim: /usr/local/lib/libopencv_videoio.so.4.6.0
-aim: /usr/lib/x86_64-linux-gnu/libyaml-cpp.so.0.7.0
-aim: ../MindVisionSdk/lib/x64/libMVSDK.so
-aim: /usr/local/lib/libopencv_imgcodecs.so.4.6.0
-aim: /usr/local/lib/libopencv_dnn.so.4.6.0
-aim: /usr/local/lib/libopencv_calib3d.so.4.6.0
-aim: /usr/local/lib/libopencv_features2d.so.4.6.0
-aim: /usr/local/lib/libopencv_flann.so.4.6.0
-aim: /usr/local/lib/libopencv_imgproc.so.4.6.0
-aim: /usr/local/lib/libopencv_core.so.4.6.0
-aim: CMakeFiles/aim.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/qiu/桌面/aim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Linking CXX executable aim"
+../bin/aim: CMakeFiles/aim.dir/src/Config.cpp.o
+../bin/aim: CMakeFiles/aim.dir/src/CameraDriver.cpp.o
+../bin/aim: CMakeFiles/aim.dir/src/KalmanTracker.cpp.o
+../bin/aim: CMakeFiles/aim.dir/src/PnPSolver.cpp.o
+../bin/aim: CMakeFiles/aim.dir/src/PreProcess.cpp.o
+../bin/aim: CMakeFiles/aim.dir/src/SerialPort.cpp.o
+../bin/aim: CMakeFiles/aim.dir/src/UdpLogger.cpp.o
+../bin/aim: CMakeFiles/aim.dir/src/main_test.cpp.o
+../bin/aim: CMakeFiles/aim.dir/build.make
+../bin/aim: /usr/local/lib/libopencv_gapi.so.4.6.0
+../bin/aim: /usr/local/lib/libopencv_highgui.so.4.6.0
+../bin/aim: /usr/local/lib/libopencv_ml.so.4.6.0
+../bin/aim: /usr/local/lib/libopencv_objdetect.so.4.6.0
+../bin/aim: /usr/local/lib/libopencv_photo.so.4.6.0
+../bin/aim: /usr/local/lib/libopencv_stitching.so.4.6.0
+../bin/aim: /usr/local/lib/libopencv_video.so.4.6.0
+../bin/aim: /usr/local/lib/libopencv_videoio.so.4.6.0
+../bin/aim: /usr/lib/x86_64-linux-gnu/libyaml-cpp.so.0.7.0
+../bin/aim: ../MindVisionSdk/lib/x64/libMVSDK.so
+../bin/aim: /usr/local/lib/libopencv_imgcodecs.so.4.6.0
+../bin/aim: /usr/local/lib/libopencv_dnn.so.4.6.0
+../bin/aim: /usr/local/lib/libopencv_calib3d.so.4.6.0
+../bin/aim: /usr/local/lib/libopencv_features2d.so.4.6.0
+../bin/aim: /usr/local/lib/libopencv_flann.so.4.6.0
+../bin/aim: /usr/local/lib/libopencv_imgproc.so.4.6.0
+../bin/aim: /usr/local/lib/libopencv_core.so.4.6.0
+../bin/aim: CMakeFiles/aim.dir/link.txt
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/qiu/桌面/aim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Linking CXX executable ../bin/aim"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/aim.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
-CMakeFiles/aim.dir/build: aim
+CMakeFiles/aim.dir/build: ../bin/aim
 .PHONY : CMakeFiles/aim.dir/build
 
 CMakeFiles/aim.dir/clean:

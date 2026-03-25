@@ -11,7 +11,7 @@ CameraDriver::CameraDriver()
     m_isOpen(false),
     m_isStreaming(false),
     m_width(640),
-    m_height(489)
+    m_height(480)
 {
     CameraSdkInit(1);
 }
@@ -87,7 +87,6 @@ bool CameraDriver::open(){
     status = CameraSetImageResolution(m_hCamera, &resolution);
     if (status != CAMERA_STATUS_SUCCESS) {
         printError(status, "设置分辨率失败");
-        // 继续，可能当前分辨率有效
     }
     // 设置为连续采集模式（0 通常表示连续）
     CameraSetTriggerMode(m_hCamera, 0);

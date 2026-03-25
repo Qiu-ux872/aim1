@@ -49,7 +49,7 @@ bool SerialPort::open() {
         case 230400: speed = B230400; break;
         case 460800: speed = B460800; break;
         default:
-            cerr << "警告：不支持的波特率 " << baudrate << "，使用 115200" << endl;
+            cerr << "不支持的波特率 " << baudrate << "，使用 115200" << endl;
             speed = B115200;
             break;
     }

@@ -10,6 +10,7 @@
 #include "KalmanTracker.hpp"
 #include "SerialPort.hpp"
 #include "UdpLogger.hpp"
+#include <memory>
 
 using namespace std;
 using namespace cv;
@@ -30,7 +31,6 @@ double getCurrentTimeSec() {
     return chrono::duration<double>(now.time_since_epoch()).count();
 }
 
-// 同时加载相机内参矩阵和畸变系数
 bool loadCameraParams(const string& filename, Mat& cameraMatrix, Mat& distCoeffs) {
     FileStorage fs(filename, FileStorage::READ);
     if (!fs.isOpened()) {
@@ -49,9 +49,9 @@ bool loadCameraParams(const string& filename, Mat& cameraMatrix, Mat& distCoeffs
         return false;
     }
 
-    fs["dist_coeffs"] >> distCoeffs;
+    fs["distortion_coeffs"] >> distCoeffs;
     if (distCoeffs.empty()) {
-        cerr << "【警告】文件中没有有效的 dist_coeffs，将使用零向量！" << endl;
+        cerr << "【警告】文件中没有有效的 distortion_coeffs，将使用零向量！" << endl;
         distCoeffs = Mat::zeros(5, 1, CV_64F);
     } else {
         if (distCoeffs.rows == 1 && distCoeffs.cols > 1) {
@@ -120,7 +120,7 @@ int main() {
         cout << "UDP 发送已禁用" << endl;
     }
 
-    namedWindow("Armor Tracking", WINDOW_AUTOSIZE);
+    namedWindow("Armor Tracking", WINDOW_NORMAL);
 
     double lastTime = getCurrentTimeSec();
     int frameCount = 0;
@@ -167,6 +167,11 @@ int main() {
                 hasTarget = true;
                 measuredPos = pnpRes.position;
 
+                // ========== 新增：yaw 卡尔曼滤波 ==========
+                double filteredYaw = tracker.updateYaw(pnpRes.yaw, timeStamp);
+                double predictedYaw = tracker.predictYaw(timeStamp);
+                // =======================================
+
                 const auto& pts = target.armor_pts;
                 for (int i = 0; i < 4; i++) {
                     line(frame, pts[i], pts[(i+1)%4], Scalar(0, 255, 0), 2);
@@ -202,10 +207,10 @@ int main() {
         // 控制台输出调试信息
         if (pnpRes.isValid) {
             cout << "PnP解算距离: " << pnpRes.distance << " mm" << endl;
-            cout << "重力补偿前yaw: " << pnpRes.yaw << "°, pitch: " << pnpRes.pitch << "°" << endl;
+            cout << "重力补偿前yaw: " << pnpRes.yaw << "度, pitch: " << pnpRes.pitch << "度" << endl;
         }
         if (tracker.isInitialized()) {
-            cout << "重力补偿后yaw: " << aim.yaw << "°, pitch: " << aim.pitch << "°" << endl;
+            cout << "重力补偿后yaw: " << aim.yaw << "度, pitch: " << aim.pitch << "度" << endl;
         }
 
         // 串口发送
@@ -264,12 +269,14 @@ int main() {
             polylines(frame, intPts, true, Scalar(0, 255, 255), 2);
         }
 
-        // 在画面左上角显示 PnP 解算结果
+        // 在画面左上角显示解算结果
         if (pnpRes.isValid) {
             string posText = format("X:%.1f Y:%.1f Z:%.1f", pnpRes.position.x, pnpRes.position.y, pnpRes.position.z);
             putText(frame, posText, Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1, LINE_AA);
-            string angleText = format("Yaw:%.2f Pitch:%.2f Roll:%.2f", pnpRes.yaw, pnpRes.pitch, pnpRes.roll);
+            string angleText = format("Yaw: %.2f (raw) / %.2f (filt) / %.2f (pred)", pnpRes.yaw, pnpRes.filteredYaw, pnpRes.predictedYaw);
             putText(frame, angleText, Point(10, 50), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1, LINE_AA);
+            string angleText2 = format("Pitch:%.2f Roll:%.2f", pnpRes.pitch, pnpRes.roll);
+            putText(frame, angleText2, Point(10, 70), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1, LINE_AA);
         } else {
             putText(frame, "No Target", Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1, LINE_AA);
         }
