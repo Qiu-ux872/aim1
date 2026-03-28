@@ -107,6 +107,14 @@ bool CameraDriver::open(){
         setAnalogGain(gain);
     }
 
+    // 设置RGB通道增益
+    float rGain = cfg.camera.rgb_gain_r;
+    float gGain = cfg.camera.rgb_gain_g;
+    float bGain = cfg.camera.rgb_gain_b;
+    if(rGain > 0 || gGain > 0 || bGain > 0){
+        setRGBGain(rGain, gGain, bGain);
+    }
+
     cout << "相机打开成功,分辨率：" << m_width << "x" << m_height << endl;
     return true;
 }
@@ -184,6 +192,24 @@ bool CameraDriver::setAnalogGain(float gain) {
         printError(status, "设置模拟增益失败");
         return false;
     }
+    return true;
+}
+
+bool CameraDriver::setRGBGain(float rGain, float gGain, float bGain) {
+    if (!m_isOpen) return false;
+
+    // 转换为整数范围（通常是0-100或类似范围）
+    int iRGain = static_cast<int>(rGain * 100);
+    int iGGain = static_cast<int>(gGain * 100);
+    int iBGain = static_cast<int>(bGain * 100);
+
+    CameraSdkStatus status = CameraSetGain(m_hCamera, iRGain, iGGain, iBGain);
+    if (status != CAMERA_STATUS_SUCCESS) {
+        printError(status, "设置RGB通道增益失败");
+        return false;
+    }
+
+    cout << "RGB通道增益设置成功 R:" << rGain << " G:" << gGain << " B:" << bGain << endl;
     return true;
 }
 

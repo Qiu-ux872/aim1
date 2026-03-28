@@ -19,6 +19,9 @@ void Config::loadYaml(const string& file_name){
         camera.fps = node["camera"]["fps"].as<int>();
         camera.exposure = node["camera"]["exposure"].as<float>();
         camera.gain = node["camera"]["gain"].as<float>();
+        camera.rgb_gain_r = node["camera"]["rgb_gain_r"].as<float>();
+        camera.rgb_gain_g = node["camera"]["rgb_gain_g"].as<float>();
+        camera.rgb_gain_b = node["camera"]["rgb_gain_b"].as<float>();
 
         preprocess.gaussian_k_size = node["preprocess"]["gaussian_k_size"].as<int>();
         preprocess.gaussian_sigma = node["preprocess"]["gaussian_sigma"].as<float>();
@@ -55,6 +58,9 @@ void Config::loadYaml(const string& file_name){
         kalman.measurementNoisePos = node["kalman"]["measurementNoisePos"].as<float>();
         kalman.initialErrorCov = node["kalman"]["initialErrorCov"].as<float>();
         kalman.angularVelocity = node["kalman"]["angularVelocity"].as<float>();
+        kalman.yawProcessNoisePos = node["kalman"]["yawProcessNoisePos"].as<float>();
+        kalman.yawProcessNoiseVel = node["kalman"]["yawProcessNoiseVel"].as<float>();
+        kalman.yawMeasurementNoise = node["kalman"]["yawMeasurementNoise"].as<float>();
         kalman.yawProcessNoisePos = node["kalman"]["yawProcessNoisePos"].as<float>();
         kalman.yawProcessNoiseVel = node["kalman"]["yawProcessNoiseVel"].as<float>();
         kalman.yawMeasurementNoise = node["kalman"]["yawMeasurementNoise"].as<float>();

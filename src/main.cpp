@@ -22,7 +22,7 @@ void drawArmor(const vector<Armor>& armors, Mat& frame){
         for (const auto& pt : armor.armor_pts) {
             intPts.push_back(Point(cvRound(pt.x), cvRound(pt.y)));
         }
-        polylines(frame, intPts, true, Scalar(0, 255, 0), 3);
+        polylines(frame, intPts, true, Scalar(0, 255, 0), 1);
     }
 }
 

@@ -28,7 +28,7 @@ set(SOURCES
     src/PreProcess.cpp
     src/SerialPort.cpp
     src/UdpLogger.cpp
-    src/main_test.cpp
+    src/main.cpp
 )
 
 # 生成可执行文件
