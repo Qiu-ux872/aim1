@@ -269,7 +269,7 @@ int main() {
             polylines(frame, intPts, true, Scalar(0, 255, 255), 2);
         }
 
-        // 在画面左上角显示解算结果
+        // 在画面左上角显示解算结果~
         if (pnpRes.isValid) {
             string posText = format("X:%.1f Y:%.1f Z:%.1f", pnpRes.position.x, pnpRes.position.y, pnpRes.position.z);
             putText(frame, posText, Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1, LINE_AA);
