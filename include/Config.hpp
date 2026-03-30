@@ -66,9 +66,6 @@ struct KalmanConfig{
     float yawProcessNoisePos = 1e-2f;   // 角度过程噪声
     float yawProcessNoiseVel = 1e-1f;   // 角速度过程噪声
     float yawMeasurementNoise = 1e-1f;  // 观测噪声
-    float yawProcessNoisePos = 1e-2f;   // 角度过程噪声
-    float yawProcessNoiseVel = 1e-1f;   // 角速度过程噪声
-    float yawMeasurementNoise = 1e-1f;  // 观测噪声
 };
 
 // 新增 UDP 配置结构体

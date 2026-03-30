@@ -177,6 +177,30 @@ src/Config.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/Config.cpp.s
 .PHONY : src/Config.cpp.s
 
+src/EKF.o: src/EKF.cpp.o
+.PHONY : src/EKF.o
+
+# target to build an object file
+src/EKF.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/EKF.cpp.o
+.PHONY : src/EKF.cpp.o
+
+src/EKF.i: src/EKF.cpp.i
+.PHONY : src/EKF.i
+
+# target to preprocess a source file
+src/EKF.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/EKF.cpp.i
+.PHONY : src/EKF.cpp.i
+
+src/EKF.s: src/EKF.cpp.s
+.PHONY : src/EKF.s
+
+# target to generate assembly for a file
+src/EKF.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/EKF.cpp.s
+.PHONY : src/EKF.cpp.s
+
 src/KalmanTracker.o: src/KalmanTracker.cpp.o
 .PHONY : src/KalmanTracker.o
 
@@ -336,6 +360,9 @@ help:
 	@echo "... src/Config.o"
 	@echo "... src/Config.i"
 	@echo "... src/Config.s"
+	@echo "... src/EKF.o"
+	@echo "... src/EKF.i"
+	@echo "... src/EKF.s"
 	@echo "... src/KalmanTracker.o"
 	@echo "... src/KalmanTracker.i"
 	@echo "... src/KalmanTracker.s"

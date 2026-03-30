@@ -97,10 +97,24 @@ CMakeFiles/aim.dir/src/CameraDriver.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/aim.dir/src/CameraDriver.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/qiu/桌面/aim/src/CameraDriver.cpp -o CMakeFiles/aim.dir/src/CameraDriver.cpp.s
 
+CMakeFiles/aim.dir/src/EKF.cpp.o: CMakeFiles/aim.dir/flags.make
+CMakeFiles/aim.dir/src/EKF.cpp.o: ../src/EKF.cpp
+CMakeFiles/aim.dir/src/EKF.cpp.o: CMakeFiles/aim.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/qiu/桌面/aim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/aim.dir/src/EKF.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/aim.dir/src/EKF.cpp.o -MF CMakeFiles/aim.dir/src/EKF.cpp.o.d -o CMakeFiles/aim.dir/src/EKF.cpp.o -c /home/qiu/桌面/aim/src/EKF.cpp
+
+CMakeFiles/aim.dir/src/EKF.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/aim.dir/src/EKF.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/qiu/桌面/aim/src/EKF.cpp > CMakeFiles/aim.dir/src/EKF.cpp.i
+
+CMakeFiles/aim.dir/src/EKF.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/aim.dir/src/EKF.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/qiu/桌面/aim/src/EKF.cpp -o CMakeFiles/aim.dir/src/EKF.cpp.s
+
 CMakeFiles/aim.dir/src/KalmanTracker.cpp.o: CMakeFiles/aim.dir/flags.make
 CMakeFiles/aim.dir/src/KalmanTracker.cpp.o: ../src/KalmanTracker.cpp
 CMakeFiles/aim.dir/src/KalmanTracker.cpp.o: CMakeFiles/aim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/qiu/桌面/aim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/aim.dir/src/KalmanTracker.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/qiu/桌面/aim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/aim.dir/src/KalmanTracker.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/aim.dir/src/KalmanTracker.cpp.o -MF CMakeFiles/aim.dir/src/KalmanTracker.cpp.o.d -o CMakeFiles/aim.dir/src/KalmanTracker.cpp.o -c /home/qiu/桌面/aim/src/KalmanTracker.cpp
 
 CMakeFiles/aim.dir/src/KalmanTracker.cpp.i: cmake_force
@@ -114,7 +128,7 @@ CMakeFiles/aim.dir/src/KalmanTracker.cpp.s: cmake_force
 CMakeFiles/aim.dir/src/PnPSolver.cpp.o: CMakeFiles/aim.dir/flags.make
 CMakeFiles/aim.dir/src/PnPSolver.cpp.o: ../src/PnPSolver.cpp
 CMakeFiles/aim.dir/src/PnPSolver.cpp.o: CMakeFiles/aim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/qiu/桌面/aim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/aim.dir/src/PnPSolver.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/qiu/桌面/aim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/aim.dir/src/PnPSolver.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/aim.dir/src/PnPSolver.cpp.o -MF CMakeFiles/aim.dir/src/PnPSolver.cpp.o.d -o CMakeFiles/aim.dir/src/PnPSolver.cpp.o -c /home/qiu/桌面/aim/src/PnPSolver.cpp
 
 CMakeFiles/aim.dir/src/PnPSolver.cpp.i: cmake_force
@@ -128,7 +142,7 @@ CMakeFiles/aim.dir/src/PnPSolver.cpp.s: cmake_force
 CMakeFiles/aim.dir/src/PreProcess.cpp.o: CMakeFiles/aim.dir/flags.make
 CMakeFiles/aim.dir/src/PreProcess.cpp.o: ../src/PreProcess.cpp
 CMakeFiles/aim.dir/src/PreProcess.cpp.o: CMakeFiles/aim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/qiu/桌面/aim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/aim.dir/src/PreProcess.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/qiu/桌面/aim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/aim.dir/src/PreProcess.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/aim.dir/src/PreProcess.cpp.o -MF CMakeFiles/aim.dir/src/PreProcess.cpp.o.d -o CMakeFiles/aim.dir/src/PreProcess.cpp.o -c /home/qiu/桌面/aim/src/PreProcess.cpp
 
 CMakeFiles/aim.dir/src/PreProcess.cpp.i: cmake_force
@@ -142,7 +156,7 @@ CMakeFiles/aim.dir/src/PreProcess.cpp.s: cmake_force
 CMakeFiles/aim.dir/src/SerialPort.cpp.o: CMakeFiles/aim.dir/flags.make
 CMakeFiles/aim.dir/src/SerialPort.cpp.o: ../src/SerialPort.cpp
 CMakeFiles/aim.dir/src/SerialPort.cpp.o: CMakeFiles/aim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/qiu/桌面/aim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/aim.dir/src/SerialPort.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/qiu/桌面/aim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/aim.dir/src/SerialPort.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/aim.dir/src/SerialPort.cpp.o -MF CMakeFiles/aim.dir/src/SerialPort.cpp.o.d -o CMakeFiles/aim.dir/src/SerialPort.cpp.o -c /home/qiu/桌面/aim/src/SerialPort.cpp
 
 CMakeFiles/aim.dir/src/SerialPort.cpp.i: cmake_force
@@ -156,7 +170,7 @@ CMakeFiles/aim.dir/src/SerialPort.cpp.s: cmake_force
 CMakeFiles/aim.dir/src/UdpLogger.cpp.o: CMakeFiles/aim.dir/flags.make
 CMakeFiles/aim.dir/src/UdpLogger.cpp.o: ../src/UdpLogger.cpp
 CMakeFiles/aim.dir/src/UdpLogger.cpp.o: CMakeFiles/aim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/qiu/桌面/aim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/aim.dir/src/UdpLogger.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/qiu/桌面/aim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/aim.dir/src/UdpLogger.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/aim.dir/src/UdpLogger.cpp.o -MF CMakeFiles/aim.dir/src/UdpLogger.cpp.o.d -o CMakeFiles/aim.dir/src/UdpLogger.cpp.o -c /home/qiu/桌面/aim/src/UdpLogger.cpp
 
 CMakeFiles/aim.dir/src/UdpLogger.cpp.i: cmake_force
@@ -170,7 +184,7 @@ CMakeFiles/aim.dir/src/UdpLogger.cpp.s: cmake_force
 CMakeFiles/aim.dir/src/main.cpp.o: CMakeFiles/aim.dir/flags.make
 CMakeFiles/aim.dir/src/main.cpp.o: ../src/main.cpp
 CMakeFiles/aim.dir/src/main.cpp.o: CMakeFiles/aim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/qiu/桌面/aim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/aim.dir/src/main.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/qiu/桌面/aim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/aim.dir/src/main.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/aim.dir/src/main.cpp.o -MF CMakeFiles/aim.dir/src/main.cpp.o.d -o CMakeFiles/aim.dir/src/main.cpp.o -c /home/qiu/桌面/aim/src/main.cpp
 
 CMakeFiles/aim.dir/src/main.cpp.i: cmake_force
@@ -185,6 +199,7 @@ CMakeFiles/aim.dir/src/main.cpp.s: cmake_force
 aim_OBJECTS = \
 "CMakeFiles/aim.dir/src/Config.cpp.o" \
 "CMakeFiles/aim.dir/src/CameraDriver.cpp.o" \
+"CMakeFiles/aim.dir/src/EKF.cpp.o" \
 "CMakeFiles/aim.dir/src/KalmanTracker.cpp.o" \
 "CMakeFiles/aim.dir/src/PnPSolver.cpp.o" \
 "CMakeFiles/aim.dir/src/PreProcess.cpp.o" \
@@ -197,6 +212,7 @@ aim_EXTERNAL_OBJECTS =
 
 ../bin/aim: CMakeFiles/aim.dir/src/Config.cpp.o
 ../bin/aim: CMakeFiles/aim.dir/src/CameraDriver.cpp.o
+../bin/aim: CMakeFiles/aim.dir/src/EKF.cpp.o
 ../bin/aim: CMakeFiles/aim.dir/src/KalmanTracker.cpp.o
 ../bin/aim: CMakeFiles/aim.dir/src/PnPSolver.cpp.o
 ../bin/aim: CMakeFiles/aim.dir/src/PreProcess.cpp.o
@@ -222,7 +238,7 @@ aim_EXTERNAL_OBJECTS =
 ../bin/aim: /usr/local/lib/libopencv_imgproc.so.4.6.0
 ../bin/aim: /usr/local/lib/libopencv_core.so.4.6.0
 ../bin/aim: CMakeFiles/aim.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/qiu/桌面/aim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Linking CXX executable ../bin/aim"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/qiu/桌面/aim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Linking CXX executable ../bin/aim"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/aim.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

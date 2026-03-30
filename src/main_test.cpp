@@ -9,6 +9,7 @@
 #include "KalmanTracker.hpp"
 #include "SerialPort.hpp"
 #include "UdpLogger.hpp"
+#include <memory>
 
 using namespace std;
 using namespace cv;
@@ -20,7 +21,7 @@ void drawArmor(const vector<Armor>& armors, Mat& frame){
         for (const auto& pt : armor.armor_pts) {
             intPts.push_back(Point(cvRound(pt.x), cvRound(pt.y)));
         }
-        polylines(frame, intPts, true, Scalar(0, 255, 0), 3);
+        polylines(frame, intPts, true, Scalar(0, 255, 0), 1);
     }
 }
 
@@ -102,9 +103,18 @@ int main() {
         cerr << "串口打开失败，将无法发送角度" << endl;
     }
 
-    UdpLogger udpLogger("127.0.0.1", 9870);
-    if (!udpLogger.isOpen()) {
-        cerr << "UDP 初始化失败，将无法发送调试数据" << endl;
+    // 根据配置创建 UDP Logger
+    unique_ptr<UdpLogger> udpLogger;
+    if (Config::get().udp.enabled) {
+        udpLogger = make_unique<UdpLogger>(Config::get().udp.host, Config::get().udp.port);
+        if (!udpLogger->isOpen()) {
+            cerr << "UDP 初始化失败，将无法发送调试数据" << endl;
+            udpLogger.reset();
+        } else {
+            cout << "UDP 已启用，目标 " << Config::get().udp.host << ":" << Config::get().udp.port << endl;
+        }
+    } else {
+        cout << "UDP 发送已禁用" << endl;
     }
 
     namedWindow("Armor Tracking", WINDOW_NORMAL);
@@ -207,8 +217,8 @@ int main() {
         }
 
         // UDP 发送到 PlotJuggler
-        if (udpLogger.isOpen()) {
-            udpLogger.send(
+        if (udpLogger && udpLogger->isOpen()) {
+            udpLogger->send(
                 timeStamp,
                 pnpRes.isValid ? pnpRes.distance : 0.0,
                 pnpRes.isValid ? pnpRes.yaw : 0.0,
@@ -255,10 +265,10 @@ int main() {
             polylines(frame, intPts, true, Scalar(0, 255, 255), 2);
         }
 
-        // 在画面左上角显示解算结果
+        // 在画面左上角显示解算结果~
         if (pnpRes.isValid) {
-            string text = format("X:%.1f Y:%.1f Z:%.1f", pnpRes.position.x, pnpRes.position.y, pnpRes.position.z);
-            putText(frame, text, Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1, LINE_AA);
+            string posText = format("X:%.1f Y:%.1f Z:%.1f", pnpRes.position.x, pnpRes.position.y, pnpRes.position.z);
+            putText(frame, posText, Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1, LINE_AA);
             string angleText = format("Yaw: %.2f (raw) / %.2f (filt) / %.2f (pred)", pnpRes.yaw, pnpRes.filteredYaw, pnpRes.predictedYaw);
             putText(frame, angleText, Point(10, 50), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1, LINE_AA);
             string angleText2 = format("Pitch:%.2f Roll:%.2f", pnpRes.pitch, pnpRes.roll);

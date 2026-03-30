@@ -171,4 +171,28 @@ double KalmanTracker::updateYaw(double measuredYaw, double timeStamp) {
     return estYaw;
 }
 
-// 其余方法类似...
+void KalmanTracker::loadParamInConfig() {
+    // 参数已在构造函数中直接从 Config::get().kalman 读取
+    // 此函数保留为空，兼容原有接口
+}
+
+cv::Point3f KalmanTracker::getEstimatedPosition() const {
+    if(!m_initialized) return cv::Point3f(0,0,0);
+    cv::Mat x = m_ekf->getState();
+    return cv::Point3f(
+        static_cast<float>(x.at<double>(0)),
+        static_cast<float>(x.at<double>(1)),
+        static_cast<float>(x.at<double>(2))
+    );
+}
+
+double KalmanTracker::getEstimatedYaw() const {
+    if(!m_yawInitialized) return 0.0;
+    cv::Mat x = m_ekf->getState();
+    return x.at<double>(6);
+}
+
+void KalmanTracker::loadYawParamsFromConfig() {
+    // 参数已在构造函数中直接从 Config::get().kalman 读取
+    // 此函数保留为空，兼容原有接口
+}

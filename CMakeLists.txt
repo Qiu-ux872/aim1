@@ -23,6 +23,7 @@ include_directories(
 set(SOURCES
     src/Config.cpp
     src/CameraDriver.cpp
+    src/EKF.cpp
     src/KalmanTracker.cpp
     src/PnPSolver.cpp
     src/PreProcess.cpp
