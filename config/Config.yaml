@@ -5,31 +5,31 @@ camera:
   fps: 120
   exposure: 10000.0
   gain: 10.0
-  rgb_gain_r: 1.0          # 红色通道增益 (0.0-4.0)
+  rgb_gain_r: 1.05          # 红色通道增益 (0.0-4.0)
   rgb_gain_g: 0.8          # 绿色通道增益 (0.0-4.0)
-  rgb_gain_b: 0.8          # 蓝色通道增益 (0.0-4.0)
+  rgb_gain_b: 0.9          # 蓝色通道增益 (0.0-4.0)
 
 preprocess:
   gaussian_k_size: 5        # 高斯模糊核大小
-  gaussian_sigma: 1.2       # 高斯模糊sigma
-  rdc_exposure_x: 0.4       # 降曝光参数1（保持对比度）
-  rdc_exposure_y: -70.0       # 降曝光参数2（不改变亮度）
+  gaussian_sigma: 1.25       # 高斯模糊sigma
+  rdc_exposure_x: 0.35       # 降曝光参数1（保持对比度）
+  rdc_exposure_y: -75.0       # 降曝光参数2（不改变亮度）
   morph_k_size: 5           # 形态学操作核大小（减小，避免灯条断裂）
-  min_area: 80.0            # 灯条最小面积
+  min_area: 85.0            # 灯条最小面积
   max_area: 8000.0          # 灯条最大面积
   min_ratio: 1.8            # 灯条最小宽高比 
   max_ratio: 4.0           # 灯条最大宽高比
   max_angle: 45.0           # 灯条最大偏转角
 
 armor:
-  max_height_diff: 10.0  # 灯条最大高度差
-  min_center_dist: 40.0     # 最小中心距离
+  max_height_diff: 8.5  # 灯条最大高度差
+  min_center_dist: 35.0     # 最小中心距离
   max_center_dist: 200.0     # 最大中心距离
-  max_angle_diff: 3.0      # 最大角度差
+  max_angle_diff: 2.0      # 最大角度差
   min_w_h_ratio: 1.5        # 装甲板最小宽高比
   max_w_h_ratio: 3.7        # 装甲板最大宽高比
   min_center_bar_ratio: 0.9    # 最小中心条比率  
-  max_center_bar_ratio: 1.3    # 最大中心条比率
+  max_center_bar_ratio: 1.25    # 最大中心条比率
 
 ballistic:
   bulletSpeed: 30.0        # 弹速
@@ -48,8 +48,16 @@ kalman:
   initialErrorCov: 1.5          # 初始误差协方差：增大会根据前几次观测修正状态；减小会缓慢修正
   angularVelocity: 7.33         # 水平转速 (rad/s)
   yawProcessNoisePos: 0.01      # 角速度过程噪声：增大响应变快，抖动；减小轨迹平滑，响应慢
-  yawProcessNoiseVel: 0.1       # 角速度过程噪声：增大适应快速转动的目标 估计速度波动大；减小适应匀速（0.05 ~ 0.1)
+  yawProcessNoiseVel: 0.3       # 角速度过程噪声：增大适应快速转动的目标 估计速度波动大；减小适应匀速（0.05 ~ 0.1)
   yawMeasurementNoise: 0.1      # 角速度观测噪声：增大依赖模型预测；减小快速跟踪观测量
+
+yolo:
+  model_path: "models/armor.onnx"
+  conf_threshold: 0.5
+  nms_threshold: 0.4
+  input_width: 640
+  input_height: 640
+  inference_interval: 3
 
 serial:
   port: "/dev/ttyUSB0"    # 串口名

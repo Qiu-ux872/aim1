@@ -65,6 +65,13 @@ void Config::loadYaml(const string& file_name){
         kalman.yawProcessNoiseVel = node["kalman"]["yawProcessNoiseVel"].as<float>();
         kalman.yawMeasurementNoise = node["kalman"]["yawMeasurementNoise"].as<float>();
 
+        yolo.model_path = node["yolo"]["model_path"].as<std::string>();
+        yolo.conf_threshold = node["yolo"]["conf_threshold"].as<float>();
+        yolo.nms_threshold = node["yolo"]["nms_threshold"].as<float>();
+        yolo.input_width = node["yolo"]["input_width"].as<int>();
+        yolo.input_height = node["yolo"]["input_height"].as<int>();
+        yolo.inference_interval = node["yolo"]["inference_interval"].as<int>();
+
         // 读取 UDP 配置
         if (node["udp"]) {
             udp.enabled = node["udp"]["enabled"].as<bool>();

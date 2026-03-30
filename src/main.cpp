@@ -10,6 +10,7 @@
 #include "KalmanTracker.hpp"
 #include "SerialPort.hpp"
 #include "UdpLogger.hpp"
+#include "YoloDetector.hpp"
 #include <memory>
 
 using namespace std;
@@ -106,7 +107,10 @@ int main() {
         cerr << "串口打开失败，将无法发送角度" << endl;
     }
 
-    // 根据配置创建 UDP Logger
+    YoloDetector yolo(Config::get().yolo);
+    int frameCnt = 0;
+
+    // UDP日志
     unique_ptr<UdpLogger> udpLogger;
     if (Config::get().udp.enabled) {
         udpLogger = make_unique<UdpLogger>(Config::get().udp.host, Config::get().udp.port);
@@ -144,6 +148,18 @@ int main() {
             continue;
         }
 
+        // YOLO辅助检测
+        if (Config::get().yolo.inference_interval == 0 ||
+            frameCnt % Config::get().yolo.inference_interval == 0) {
+            auto detections = yolo.detect(frame);
+            if (!detections.empty()) {
+                // 取置信度最高的框
+                cv::Rect roi = detections[0].box;
+                //rectangle(frame, roi, Scalar(0, 255, 255), 2); // 绘制YOLO框（黄色）
+            }
+        }
+        frameCnt++;
+
         Mat binary = PreProcess::process(frame);
         vector<LightBar> lightBars = PreProcess::detectLightBars(binary);
 
@@ -167,10 +183,8 @@ int main() {
                 hasTarget = true;
                 measuredPos = pnpRes.position;
 
-                // ========== 新增：yaw 卡尔曼滤波 ==========
                 double filteredYaw = tracker.updateYaw(pnpRes.yaw, timeStamp);
                 double predictedYaw = tracker.predictYaw(timeStamp);
-                // =======================================
 
                 const auto& pts = target.armor_pts;
                 for (int i = 0; i < 4; i++) {
@@ -204,7 +218,6 @@ int main() {
             aim = angleSolver.calculateAimAngle(dummy);
         }
 
-        // 控制台输出调试信息
         if (pnpRes.isValid) {
             cout << "PnP解算距离: " << pnpRes.distance << " mm" << endl;
             cout << "重力补偿前yaw: " << pnpRes.yaw << "度, pitch: " << pnpRes.pitch << "度" << endl;
@@ -213,14 +226,12 @@ int main() {
             cout << "重力补偿后yaw: " << aim.yaw << "度, pitch: " << aim.pitch << "度" << endl;
         }
 
-        // 串口发送
         if (serial.isOpen() && tracker.isInitialized()) {
             if (!serial.sendAimAngle(aim)) {
                 cerr << "串口发送失败" << endl;
             }
         }
 
-        // UDP 发送到 PlotJuggler
         if (udpLogger && udpLogger->isOpen()) {
             udpLogger->send(
                 timeStamp,
@@ -234,7 +245,6 @@ int main() {
             );
         }
 
-        // 绘制卡尔曼滤波点
         if (tracker.isInitialized()) {
             if (hasTarget) {
                 Point2f ptMeas = projectPoint(measuredPos, cameraMatrix, distCoeffs);
@@ -246,7 +256,6 @@ int main() {
             circle(frame, ptPred, 5, Scalar(0, 0, 255), -1);
         }
 
-        // 绘制卡尔曼估计的装甲板框（黄色）
         if (tracker.isInitialized()) {
             const float armorWidth = 135.0f;
             const float armorHeight = 125.0f;
@@ -269,7 +278,6 @@ int main() {
             polylines(frame, intPts, true, Scalar(0, 255, 255), 2);
         }
 
-        // 在画面左上角显示解算结果~
         if (pnpRes.isValid) {
             string posText = format("X:%.1f Y:%.1f Z:%.1f", pnpRes.position.x, pnpRes.position.y, pnpRes.position.z);
             putText(frame, posText, Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1, LINE_AA);

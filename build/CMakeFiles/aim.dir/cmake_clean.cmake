@@ -17,8 +17,10 @@ file(REMOVE_RECURSE
   "CMakeFiles/aim.dir/src/SerialPort.cpp.o.d"
   "CMakeFiles/aim.dir/src/UdpLogger.cpp.o"
   "CMakeFiles/aim.dir/src/UdpLogger.cpp.o.d"
-  "CMakeFiles/aim.dir/src/main.cpp.o"
-  "CMakeFiles/aim.dir/src/main.cpp.o.d"
+  "CMakeFiles/aim.dir/src/YoloDetector.cpp.o"
+  "CMakeFiles/aim.dir/src/YoloDetector.cpp.o.d"
+  "CMakeFiles/aim.dir/src/main_test.cpp.o"
+  "CMakeFiles/aim.dir/src/main_test.cpp.o.d"
 )
 
 # Per-language clean rules from dependency scanning.

@@ -321,29 +321,53 @@ src/UdpLogger.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/UdpLogger.cpp.s
 .PHONY : src/UdpLogger.cpp.s
 
-src/main.o: src/main.cpp.o
-.PHONY : src/main.o
+src/YoloDetector.o: src/YoloDetector.cpp.o
+.PHONY : src/YoloDetector.o
 
 # target to build an object file
-src/main.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/main.cpp.o
-.PHONY : src/main.cpp.o
+src/YoloDetector.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/YoloDetector.cpp.o
+.PHONY : src/YoloDetector.cpp.o
 
-src/main.i: src/main.cpp.i
-.PHONY : src/main.i
+src/YoloDetector.i: src/YoloDetector.cpp.i
+.PHONY : src/YoloDetector.i
 
 # target to preprocess a source file
-src/main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/main.cpp.i
-.PHONY : src/main.cpp.i
+src/YoloDetector.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/YoloDetector.cpp.i
+.PHONY : src/YoloDetector.cpp.i
 
-src/main.s: src/main.cpp.s
-.PHONY : src/main.s
+src/YoloDetector.s: src/YoloDetector.cpp.s
+.PHONY : src/YoloDetector.s
 
 # target to generate assembly for a file
-src/main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/main.cpp.s
-.PHONY : src/main.cpp.s
+src/YoloDetector.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/YoloDetector.cpp.s
+.PHONY : src/YoloDetector.cpp.s
+
+src/main_test.o: src/main_test.cpp.o
+.PHONY : src/main_test.o
+
+# target to build an object file
+src/main_test.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/main_test.cpp.o
+.PHONY : src/main_test.cpp.o
+
+src/main_test.i: src/main_test.cpp.i
+.PHONY : src/main_test.i
+
+# target to preprocess a source file
+src/main_test.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/main_test.cpp.i
+.PHONY : src/main_test.cpp.i
+
+src/main_test.s: src/main_test.cpp.s
+.PHONY : src/main_test.s
+
+# target to generate assembly for a file
+src/main_test.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/main_test.cpp.s
+.PHONY : src/main_test.cpp.s
 
 # Help Target
 help:
@@ -378,9 +402,12 @@ help:
 	@echo "... src/UdpLogger.o"
 	@echo "... src/UdpLogger.i"
 	@echo "... src/UdpLogger.s"
-	@echo "... src/main.o"
-	@echo "... src/main.i"
-	@echo "... src/main.s"
+	@echo "... src/YoloDetector.o"
+	@echo "... src/YoloDetector.i"
+	@echo "... src/YoloDetector.s"
+	@echo "... src/main_test.o"
+	@echo "... src/main_test.i"
+	@echo "... src/main_test.s"
 .PHONY : help
 
 

@@ -3236,7 +3236,7 @@ CMakeFiles/aim.dir/src/UdpLogger.cpp.o: ../src/UdpLogger.cpp \
   /usr/include/x86_64-linux-gnu/bits/mathcalls-narrow.h \
   /usr/include/x86_64-linux-gnu/bits/iscanonical.h
 
-CMakeFiles/aim.dir/src/main.cpp.o: ../src/main.cpp \
+CMakeFiles/aim.dir/src/main_test.cpp.o: ../src/main_test.cpp \
   /usr/include/stdc-predef.h \
   /usr/include/c++/11/iostream \
   /usr/include/x86_64-linux-gnu/c++/11/bits/c++config.h \
@@ -3666,10 +3666,6 @@ CMakeFiles/aim.dir/src/main.cpp.o: ../src/main.cpp \
   /usr/include/yaml-cpp/node/detail/impl.h \
   /usr/include/yaml-cpp/node/parse.h \
   /usr/include/yaml-cpp/node/emit.h \
-  ../include/CameraDriver.hpp \
-  /usr/include/CameraApi.h \
-  /usr/include/CameraDefine.h \
-  /usr/include/CameraStatus.h \
   ../include/PreProcess.hpp \
   ../include/Param.hpp \
   ../include/PnPSolver.hpp \
@@ -3707,7 +3703,7 @@ CMakeFiles/aim.dir/src/main.cpp.o: ../src/main.cpp \
   /usr/include/linux/close_range.h
 
 
-../src/main.cpp:
+../src/main_test.cpp:
 
 /usr/include/x86_64-linux-gnu/bits/types/struct_osockaddr.h:
 
