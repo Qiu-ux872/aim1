@@ -38,6 +38,6 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 target_link_libraries(${PROJECT_NAME}
     ${OpenCV_LIBS}
     ${YAML_CPP_LIBRARIES}
-    ${CMAKE_SOURCE_DIR}/MindVisionSdk/lib/arm64/libMVSDK.so
+    ${CMAKE_SOURCE_DIR}/MindVisionSdk/lib/x64/libMVSDK.so
     pthread
 )

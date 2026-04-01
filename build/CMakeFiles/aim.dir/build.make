@@ -230,7 +230,6 @@ aim_EXTERNAL_OBJECTS =
 ../bin/aim: /usr/local/lib/libopencv_videoio.so.4.6.0
 ../bin/aim: /usr/lib/x86_64-linux-gnu/libyaml-cpp.so.0.7.0
 ../bin/aim: ../MindVisionSdk/lib/x64/libMVSDK.so
-../bin/aim: /usr/local/lib/libonnxruntime.so
 ../bin/aim: /usr/local/lib/libopencv_imgcodecs.so.4.6.0
 ../bin/aim: /usr/local/lib/libopencv_dnn.so.4.6.0
 ../bin/aim: /usr/local/lib/libopencv_calib3d.so.4.6.0
