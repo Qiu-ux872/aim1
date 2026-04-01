@@ -49,7 +49,7 @@ kalman:
   angularVelocity: 7.33         # 水平转速 (rad/s)
   yawProcessNoisePos: 0.01      # 角速度过程噪声：增大响应变快，抖动；减小轨迹平滑，响应慢
   yawProcessNoiseVel: 0.3       # 角速度过程噪声：增大适应快速转动的目标 估计速度波动大；减小适应匀速（0.05 ~ 0.1)
-  yawMeasurementNoise: 0.1      # 角速度观测噪声：增大依赖模型预测；减小快速跟踪观测量
+  yawMeasurementNoise: 0.5      # 角速度观测噪声：增大依赖模型预测；减小快速跟踪观测量
 
 serial:
   port: "/dev/ttyUSB0"    # 串口名
