@@ -4,14 +4,11 @@ project(aim)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# 设置可执行文件输出目录为项目根目录下的 bin
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
 # 查找依赖包
 find_package(OpenCV REQUIRED)
 find_package(yaml-cpp REQUIRED)
-
-find_library(ONNXRUNTIME_LIB onnxruntime /usr/local/lib)
 
 # 包含头文件目录
 include_directories(
@@ -19,7 +16,6 @@ include_directories(
     ${OpenCV_INCLUDE_DIRS}
     ${YAML_CPP_INCLUDE_DIRS}
     ${CMAKE_SOURCE_DIR}/MindVisionSdk
-    /usr/include/onnxruntime
 )
 
 # 收集所有源文件
@@ -33,7 +29,6 @@ set(SOURCES
     src/SerialPort.cpp
     src/UdpLogger.cpp
     src/main_test.cpp
-    src/YoloDetector.cpp
 )
 
 # 生成可执行文件
@@ -43,7 +38,6 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 target_link_libraries(${PROJECT_NAME}
     ${OpenCV_LIBS}
     ${YAML_CPP_LIBRARIES}
-    ${CMAKE_SOURCE_DIR}/MindVisionSdk/lib/x64/libMVSDK.so
-    ${ONNXRUNTIME_LIB}
+    ${CMAKE_SOURCE_DIR}/MindVisionSdk/lib/arm64/libMVSDK.so
     pthread
 )

@@ -321,30 +321,6 @@ src/UdpLogger.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/UdpLogger.cpp.s
 .PHONY : src/UdpLogger.cpp.s
 
-src/YoloDetector.o: src/YoloDetector.cpp.o
-.PHONY : src/YoloDetector.o
-
-# target to build an object file
-src/YoloDetector.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/YoloDetector.cpp.o
-.PHONY : src/YoloDetector.cpp.o
-
-src/YoloDetector.i: src/YoloDetector.cpp.i
-.PHONY : src/YoloDetector.i
-
-# target to preprocess a source file
-src/YoloDetector.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/YoloDetector.cpp.i
-.PHONY : src/YoloDetector.cpp.i
-
-src/YoloDetector.s: src/YoloDetector.cpp.s
-.PHONY : src/YoloDetector.s
-
-# target to generate assembly for a file
-src/YoloDetector.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/YoloDetector.cpp.s
-.PHONY : src/YoloDetector.cpp.s
-
 src/main_test.o: src/main_test.cpp.o
 .PHONY : src/main_test.o
 
@@ -402,9 +378,6 @@ help:
 	@echo "... src/UdpLogger.o"
 	@echo "... src/UdpLogger.i"
 	@echo "... src/UdpLogger.s"
-	@echo "... src/YoloDetector.o"
-	@echo "... src/YoloDetector.i"
-	@echo "... src/YoloDetector.s"
 	@echo "... src/main_test.o"
 	@echo "... src/main_test.i"
 	@echo "... src/main_test.s"

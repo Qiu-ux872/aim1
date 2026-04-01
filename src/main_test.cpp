@@ -3,14 +3,13 @@
 #include <thread>
 #include <opencv2/opencv.hpp>
 
+#include "EKF.hpp"
 #include "Config.hpp"
 #include "PreProcess.hpp"
 #include "PnPSolver.hpp"
 #include "KalmanTracker.hpp"
 #include "SerialPort.hpp"
 #include "UdpLogger.hpp"
-#include "YoloDetector.hpp"
-#include <memory>
 
 using namespace std;
 using namespace cv;
@@ -104,9 +103,6 @@ int main() {
         cerr << "串口打开失败，将无法发送角度" << endl;
     }
 
-    YoloDetector yolo(Config::get().yolo);
-    int frameCnt = 0;
-
     // UDP日志
     unique_ptr<UdpLogger> udpLogger;
     if (Config::get().udp.enabled) {
@@ -145,21 +141,6 @@ int main() {
             cout << "视频播放完毕，退出循环" << endl;
             break;
         }
-
-        // YOLO辅助检测
-        if (Config::get().yolo.inference_interval == 0 ||
-            frameCnt % Config::get().yolo.inference_interval == 0) {
-            auto detections = yolo.detect(frame);
-            if (!detections.empty()) {
-                cv::Rect roi = detections[0].box;
-                roi.x = std::max(0, roi.x - 20);
-                roi.y = std::max(0, roi.y - 20);
-                roi.width = std::min(frame.cols - roi.x, roi.width + 40);
-                roi.height = std::min(frame.rows - roi.y, roi.height + 40);
-                rectangle(frame, roi, Scalar(0, 255, 255), 2); // 绘制YOLO框
-            }
-        }
-        frameCnt++;
 
         Mat binary = PreProcess::process(frame);
         vector<LightBar> lightBars = PreProcess::detectLightBars(binary);
