@@ -15,10 +15,10 @@ file(REMOVE_RECURSE
   "CMakeFiles/aim.dir/src/PreProcess.cpp.o.d"
   "CMakeFiles/aim.dir/src/SerialPort.cpp.o"
   "CMakeFiles/aim.dir/src/SerialPort.cpp.o.d"
-  "CMakeFiles/aim.dir/src/UdpLogger.cpp.o"
-  "CMakeFiles/aim.dir/src/UdpLogger.cpp.o.d"
   "CMakeFiles/aim.dir/src/main_test.cpp.o"
   "CMakeFiles/aim.dir/src/main_test.cpp.o.d"
+  "CMakeFiles/aim.dir/src/plotter.cpp.o"
+  "CMakeFiles/aim.dir/src/plotter.cpp.o.d"
 )
 
 # Per-language clean rules from dependency scanning.

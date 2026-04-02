@@ -2,6 +2,7 @@
 #include <chrono>
 #include <thread>
 #include <opencv2/opencv.hpp>
+#include <nlohmann/json.hpp>
 
 #include "EKF.hpp"
 #include "Config.hpp"
@@ -10,7 +11,7 @@
 #include "PnPSolver.hpp"
 #include "KalmanTracker.hpp"
 #include "SerialPort.hpp"
-#include "UdpLogger.hpp"
+#include "plotter.hpp"   // 替换 UdpLogger.hpp
 
 using namespace std;
 using namespace cv;
@@ -106,18 +107,14 @@ int main() {
         cerr << "串口打开失败，将无法发送角度" << endl;
     }
 
-    // UDP日志
-    unique_ptr<UdpLogger> udpLogger;
+    // UDP 日志（使用 Plotter）
+    unique_ptr<tools::Plotter> plotter;
     if (Config::get().udp.enabled) {
-        udpLogger = make_unique<UdpLogger>(Config::get().udp.host, Config::get().udp.port);
-        if (!udpLogger->isOpen()) {
-            cerr << "UDP 初始化失败，将无法发送调试数据" << endl;
-            udpLogger.reset();
-        } else {
-            cout << "UDP 已启用，目标 " << Config::get().udp.host << ":" << Config::get().udp.port << endl;
-        }
+        plotter = make_unique<tools::Plotter>(Config::get().udp.host, Config::get().udp.port);
+        // Plotter 没有 isOpen() 方法，默认认为创建成功
+        cout << "Plotter 已启用，目标 " << Config::get().udp.host << ":" << Config::get().udp.port << endl;
     } else {
-        cout << "UDP 发送已禁用" << endl;
+        cout << "Plotter 发送已禁用" << endl;
     }
 
     namedWindow("Armor Tracking", WINDOW_NORMAL);
@@ -216,17 +213,23 @@ int main() {
             }
         }
 
-        if (udpLogger && udpLogger->isOpen()) {
-            udpLogger->send(
-                timeStamp,
-                pnpRes.isValid ? pnpRes.distance : 0.0,
-                pnpRes.isValid ? pnpRes.yaw : 0.0,
-                pnpRes.isValid ? pnpRes.pitch : 0.0,
-                pnpRes.isValid ? pnpRes.roll : 0.0,
-                aim.yaw, aim.pitch,
-                estPos.x, estPos.y, estPos.z,
-                predPos.x, predPos.y, predPos.z
-            );
+        // 使用 Plotter 发送 UDP 数据
+        if (plotter) {
+            nlohmann::json j;
+            j["timestamp"] = timeStamp;
+            j["pnp_distance"] = pnpRes.isValid ? pnpRes.distance : 0.0;
+            j["pnp_yaw"] = pnpRes.isValid ? pnpRes.yaw : 0.0;
+            j["pnp_pitch"] = pnpRes.isValid ? pnpRes.pitch : 0.0;
+            j["pnp_roll"] = pnpRes.isValid ? pnpRes.roll : 0.0;
+            j["aim_yaw"] = aim.yaw;
+            j["aim_pitch"] = aim.pitch;
+            j["est_x"] = estPos.x;
+            j["est_y"] = estPos.y;
+            j["est_z"] = estPos.z;
+            j["pred_x"] = predPos.x;
+            j["pred_y"] = predPos.y;
+            j["pred_z"] = predPos.z;
+            plotter->plot(j);
         }
 
         if (tracker.isInitialized()) {

@@ -9,6 +9,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 # 查找依赖包
 find_package(OpenCV REQUIRED)
 find_package(yaml-cpp REQUIRED)
+find_package(nlohmann_json REQUIRED)
 
 # 包含头文件目录
 include_directories(
@@ -27,7 +28,7 @@ set(SOURCES
     src/PnPSolver.cpp
     src/PreProcess.cpp
     src/SerialPort.cpp
-    src/UdpLogger.cpp
+    src/plotter.cpp
     src/main_test.cpp
 )
 
@@ -39,5 +40,6 @@ target_link_libraries(${PROJECT_NAME}
     ${OpenCV_LIBS}
     ${YAML_CPP_LIBRARIES}
     ${CMAKE_SOURCE_DIR}/MindVisionSdk/lib/x64/libMVSDK.so
+    nlohmann_json::nlohmann_json
     pthread
 )

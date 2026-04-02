@@ -297,30 +297,6 @@ src/SerialPort.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/SerialPort.cpp.s
 .PHONY : src/SerialPort.cpp.s
 
-src/UdpLogger.o: src/UdpLogger.cpp.o
-.PHONY : src/UdpLogger.o
-
-# target to build an object file
-src/UdpLogger.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/UdpLogger.cpp.o
-.PHONY : src/UdpLogger.cpp.o
-
-src/UdpLogger.i: src/UdpLogger.cpp.i
-.PHONY : src/UdpLogger.i
-
-# target to preprocess a source file
-src/UdpLogger.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/UdpLogger.cpp.i
-.PHONY : src/UdpLogger.cpp.i
-
-src/UdpLogger.s: src/UdpLogger.cpp.s
-.PHONY : src/UdpLogger.s
-
-# target to generate assembly for a file
-src/UdpLogger.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/UdpLogger.cpp.s
-.PHONY : src/UdpLogger.cpp.s
-
 src/main_test.o: src/main_test.cpp.o
 .PHONY : src/main_test.o
 
@@ -344,6 +320,30 @@ src/main_test.s: src/main_test.cpp.s
 src/main_test.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/main_test.cpp.s
 .PHONY : src/main_test.cpp.s
+
+src/plotter.o: src/plotter.cpp.o
+.PHONY : src/plotter.o
+
+# target to build an object file
+src/plotter.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/plotter.cpp.o
+.PHONY : src/plotter.cpp.o
+
+src/plotter.i: src/plotter.cpp.i
+.PHONY : src/plotter.i
+
+# target to preprocess a source file
+src/plotter.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/plotter.cpp.i
+.PHONY : src/plotter.cpp.i
+
+src/plotter.s: src/plotter.cpp.s
+.PHONY : src/plotter.s
+
+# target to generate assembly for a file
+src/plotter.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/plotter.cpp.s
+.PHONY : src/plotter.cpp.s
 
 # Help Target
 help:
@@ -375,12 +375,12 @@ help:
 	@echo "... src/SerialPort.o"
 	@echo "... src/SerialPort.i"
 	@echo "... src/SerialPort.s"
-	@echo "... src/UdpLogger.o"
-	@echo "... src/UdpLogger.i"
-	@echo "... src/UdpLogger.s"
 	@echo "... src/main_test.o"
 	@echo "... src/main_test.i"
 	@echo "... src/main_test.s"
+	@echo "... src/plotter.o"
+	@echo "... src/plotter.i"
+	@echo "... src/plotter.s"
 .PHONY : help
 
 
