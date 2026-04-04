@@ -68,6 +68,15 @@ struct KalmanConfig{
     float yawMeasurementNoise = 1e-1f;  // 观测噪声
 };
 
+struct YoloConfig{
+    std::string model_path = "models/armor.onnx";
+    float conf_threshold = 0.5f;
+    float nms_threshold = 0.4f;
+    int input_width = 640;
+    int input_height = 640;
+    int inference_interval = 3;   // 每多少帧执行一次推理
+};
+
 // 新增 UDP 配置结构体
 struct UdpConfig{
     bool enabled = false;
@@ -92,6 +101,7 @@ public:
     Ballistic ballistic;
     KalmanConfig kalman;
     UdpConfig udp;
+    YoloConfig yolo;
 
 private:
     Config();

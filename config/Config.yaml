@@ -11,15 +11,15 @@ camera:
 
 preprocess:
   gaussian_k_size: 5        # 高斯模糊核大小
-  gaussian_sigma: 1.25       # 高斯模糊sigma
-  rdc_exposure_x: 0.35       # 降曝光参数1（保持对比度）
-  rdc_exposure_y: -75.0       # 降曝光参数2（不改变亮度）
+  gaussian_sigma: 1.1       # 高斯模糊sigma
+  rdc_exposure_x: 0.4       # 降曝光参数1（保持对比度）
+  rdc_exposure_y: -73.0       # 降曝光参数2（不改变亮度）
   morph_k_size: 5           # 形态学操作核大小（减小，避免灯条断裂）
   min_area: 85.0            # 灯条最小面积
-  max_area: 8000.0          # 灯条最大面积
-  min_ratio: 2.0            # 灯条最小宽高比 
-  max_ratio: 4.2            # 灯条最大宽高比
-  max_angle: 50.0           # 灯条最大偏转角
+  max_area: 10000.0          # 灯条最大面积
+  min_ratio: 1.8            # 灯条最小宽高比 
+  max_ratio: 4.3            # 灯条最大宽高比
+  max_angle: 55.0           # 灯条最大偏转角
 
 armor:
   max_height_diff: 8.5  # 灯条最大高度差
@@ -34,22 +34,27 @@ armor:
 ballistic:
   bulletSpeed: 30.0        # 弹速
   gravity: 9.8              # 重力加速度
-  camera_offset_x: 0.0
-  camera_offset_y: -40.43
-  camera_offset_z: 64.35
+  camera_offset_x: 6.75
+  camera_offset_y: -42.50
+  camera_offset_z: 18.90
 
 kalman:
-  processNoisePos: 0.8       # 位置过程噪声：增大响应变快，抖动；减小轨迹平滑，响应慢
-  processNoiseVel: 0.5         # 速度过程噪声：增大适应快速转动的目标 估计速度波动大；减小适应匀速（0.05 ~ 0.1)
-  measurementNoisePos: 0.3     # 观测噪声：增大依赖模型预测；减小快速跟踪观测量
-  yawProcessNoisePos: 0.01      # 偏航过程噪声：增大响应变快，抖动；减小轨迹平滑，响应慢
-  yawProcessNoiseVel: 0.5        # 偏航速度过程噪声：增大适应快速转动的目标 估计速度波动大；减小适应匀速（0.05 ~ 0.1)
-  yawMeasurementNoise: 0.01      # 偏航观测噪声：增大依赖模型预测；减小快速跟踪观测量
-  initialErrorCov: 1.5          # 初始误差协方差：增大会根据前几次观测修正状态；减小会缓慢修正
-  angularVelocity: 7.33         # 水平转速 (rad/s)
-  yawProcessNoisePos: 0.1      # 角度过程噪声：增大响应变快，抖动；减小轨迹平滑，响应慢
-  yawProcessNoiseVel: 0.5      # 角速度过程噪声：增大适应快速转动的目标 估计速度波动大；减小适应匀速（0.05 ~ 0.1)
-  yawMeasurementNoise: 0.8      # 角速度观测噪声：增大依赖模型预测；减小快速跟踪观测量
+  processNoisePos: 0.5          # 位置过程噪声：增大 相信位置观测 减小 相信模型预测
+  processNoiseVel: 1.2          # 速度过程噪声：增大 响应速度变快 减小 响应速度变慢
+  measurementNoisePos: 0.01      # 位置观测噪声：增大 相信模型预测 减小 相信位置观测
+  yawProcessNoisePos: 0.01      # 角度过程噪声：增大 相信角度观测 减小 相信模型预测
+  yawProcessNoiseVel: 2.5       # 角速度过程噪声：增大 角速度响应变快 减小 角跟踪实际变化能力变差
+  yawMeasurementNoise: 0.01      # 角度观测噪声：增大 信任角速度观测 减小 直接采用观测角度
+  initialErrorCov: 1.0          # 初始误差协方差：增大 启动阶段响应速度变快 减小 启动阶段响应速度变慢
+  angularVelocity: 7.33         
+
+yolo:
+  model_path: "model/best.onnx" 
+  conf_threshold: 0.39        #置信度阈值
+  nms_threshold: 0.4          #NMS阈值
+  input_width: 640
+  input_height: 640
+  inference_interval: 1 # 每隔多少帧进行一次YOLO推理，减少计算负担
 
 serial:
   port: "/dev/ttyUSB0"    # 串口名

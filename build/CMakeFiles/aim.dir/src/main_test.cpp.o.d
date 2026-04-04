@@ -432,4 +432,10 @@ CMakeFiles/aim.dir/src/main_test.cpp.o: \
  /usr/include/x86_64-linux-gnu/asm/sockios.h \
  /usr/include/asm-generic/sockios.h \
  /usr/include/x86_64-linux-gnu/bits/types/struct_osockaddr.h \
- /usr/include/x86_64-linux-gnu/bits/in.h
+ /usr/include/x86_64-linux-gnu/bits/in.h \
+ /home/qiu/桌面/aim/include/YoloDetector.hpp \
+ /usr/local/include/onnxruntime_cxx_api.h \
+ /usr/local/include/onnxruntime_c_api.h \
+ /usr/lib/gcc/x86_64-linux-gnu/11/include/stdbool.h \
+ /usr/local/include/onnxruntime_float16.h \
+ /usr/local/include/onnxruntime_cxx_inline.h

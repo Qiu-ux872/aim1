@@ -85,8 +85,7 @@ cv::Mat ExtendedKalmanFilter::correct(const cv::Mat& z) {
         if (m_Jh) {
             H_current = m_Jh(m_x, 0.0);
         } else {
-            // 数值雅可比 (如果未提供)
-            // 为观测函数创建一个包装器，使其匹配 numericalJacobian 的签名
+            // 数值雅可比
             auto h_wrapper = [this](const cv::Mat& x, double dt) -> cv::Mat {
                 return m_h(x);
             };
@@ -102,7 +101,7 @@ cv::Mat ExtendedKalmanFilter::correct(const cv::Mat& z) {
     cv::Mat y = z - z_pred;  // 新息
     m_x = m_x + K * y;
 
-    // 协方差更新 (Joseph form, 数值更稳定)
+    // 协方差更新
     m_P = (m_I - K * H_current) * m_P * (m_I - K * H_current).t() + K * m_R * K.t();
 
     return m_x;

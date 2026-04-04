@@ -11,6 +11,7 @@
 #include "KalmanTracker.hpp"
 #include "SerialPort.hpp"
 #include "plotter.hpp"
+#include "YoloDetector.hpp"
 
 using namespace std;
 using namespace cv;
@@ -98,6 +99,8 @@ int main() {
 
     KalmanTracker tracker;
     AngleSolver angleSolver;
+    YoloDetector yolo(Config::get().yolo);
+    int frameCnt = 0;
 
     SerialPort serial;
     if (!serial.open()) {
@@ -120,6 +123,8 @@ int main() {
     double fps = 0.0;
 
     Point3f predPos(0, 0, 0);
+    double filteredYaw = 0.0;
+    double predictedYaw = 0.0;
 
     while (true) {
         double timeStamp = getCurrentTimeSec();
@@ -161,8 +166,8 @@ int main() {
                 hasTarget = true;
                 measuredPos = pnpRes.position;
 
-                double filteredYaw = tracker.updateYaw(pnpRes.yaw, timeStamp);
-                double predictedYaw = tracker.predictYaw(timeStamp);
+                filteredYaw = tracker.updateYaw(pnpRes.yaw, timeStamp);
+                predictedYaw = tracker.predictYaw(timeStamp);
 
                 const auto& pts = target.armor_pts;
                 for (int i = 0; i < 4; i++) {
@@ -229,26 +234,28 @@ int main() {
             plotter->plot(j);
         }
 
+        // 绘制卡尔曼滤波点（无文字）
         if (tracker.isInitialized()) {
             if (hasTarget) {
                 Point2f ptMeas = projectPoint(measuredPos, cameraMatrix, distCoeffs);
-                circle(frame, ptMeas, 5, Scalar(255, 0, 0), -1);
+                circle(frame, ptMeas, 3, Scalar(255, 0, 0), -1);   // 蓝色：识别
             }
             Point2f ptEst = projectPoint(estPos, cameraMatrix, distCoeffs);
-            circle(frame, ptEst, 5, Scalar(255, 255, 255), -1);
+            circle(frame, ptEst, 3, Scalar(255, 255, 255), -1);    // 白色：卡尔曼估计
             Point2f ptPred = projectPoint(predPos, cameraMatrix, distCoeffs);
-            circle(frame, ptPred, 5, Scalar(0, 0, 255), -1);
+            circle(frame, ptPred, 3, Scalar(0, 0, 255), -1);       // 红色：卡尔曼预测
         }
 
+        // 绘制卡尔曼预测的装甲板框（黄色）
         if (tracker.isInitialized()) {
             const float armorWidth = 135.0f;
             const float armorHeight = 125.0f;
 
             vector<Point3f> objPts(4);
-            objPts[0] = estPos + Point3f(-armorWidth/2, -armorHeight/2, 0);
-            objPts[1] = estPos + Point3f( armorWidth/2, -armorHeight/2, 0);
-            objPts[2] = estPos + Point3f( armorWidth/2,  armorHeight/2, 0);
-            objPts[3] = estPos + Point3f(-armorWidth/2,  armorHeight/2, 0);
+            objPts[0] = predPos + Point3f(-armorWidth/2, -armorHeight/2, 0);
+            objPts[1] = predPos + Point3f( armorWidth/2, -armorHeight/2, 0);
+            objPts[2] = predPos + Point3f( armorWidth/2,  armorHeight/2, 0);
+            objPts[3] = predPos + Point3f(-armorWidth/2,  armorHeight/2, 0);
 
             vector<Point2f> imgPts;
             for (const auto& pt : objPts) {
@@ -265,7 +272,7 @@ int main() {
         if (pnpRes.isValid) {
             string text = format("X:%.1f Y:%.1f Z:%.1f", pnpRes.position.x, pnpRes.position.y, pnpRes.position.z);
             putText(frame, text, Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1, LINE_AA);
-            text = format("Yaw: %.2f (raw) / %.2f (filt) / %.2f (pred)", pnpRes.yaw, pnpRes.filteredYaw, pnpRes.predictedYaw);
+            text = format("Yaw: %.2f (raw) / %.2f (filt) / %.2f (pred)", pnpRes.yaw, filteredYaw, predictedYaw);
             putText(frame, text, Point(10, 50), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1, LINE_AA);
             text = format("Pitch:%.2f Roll:%.2f", pnpRes.pitch, pnpRes.roll);
             putText(frame, text, Point(10, 70), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1, LINE_AA);

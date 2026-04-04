@@ -11,7 +11,8 @@
 #include "PnPSolver.hpp"
 #include "KalmanTracker.hpp"
 #include "SerialPort.hpp"
-#include "plotter.hpp"   // 替换 UdpLogger.hpp
+#include "plotter.hpp"
+#include "YoloDetector.hpp"
 
 using namespace std;
 using namespace cv;
@@ -40,7 +41,6 @@ bool loadCameraParams(const string& filename, Mat& cameraMatrix, Mat& distCoeffs
         distCoeffs = Mat::zeros(5, 1, CV_64F);
         return false;
     }
-
     fs["camera_matrix"] >> cameraMatrix;
     if (cameraMatrix.empty() || cameraMatrix.rows != 3 || cameraMatrix.cols != 3) {
         cerr << "【警告】文件中没有有效的 camera_matrix，将使用默认内参！" << endl;
@@ -49,7 +49,6 @@ bool loadCameraParams(const string& filename, Mat& cameraMatrix, Mat& distCoeffs
         fs.release();
         return false;
     }
-
     fs["distortion_coeffs"] >> distCoeffs;
     if (distCoeffs.empty()) {
         cerr << "【警告】文件中没有有效的 distortion_coeffs，将使用零向量！" << endl;
@@ -62,7 +61,6 @@ bool loadCameraParams(const string& filename, Mat& cameraMatrix, Mat& distCoeffs
             distCoeffs = Mat::zeros(5, 1, CV_64F);
         }
     }
-
     PreProcess::camera_matrix = cameraMatrix.clone();
     PreProcess::dist_coeffs = distCoeffs.clone();
     cout << "相机参数加载成功！" << endl;
@@ -101,17 +99,17 @@ int main() {
 
     KalmanTracker tracker;
     AngleSolver angleSolver;
+    YoloDetector yolo(Config::get().yolo);
+    int frameCnt = 0;
 
     SerialPort serial;
     if (!serial.open()) {
         cerr << "串口打开失败，将无法发送角度" << endl;
     }
 
-    // UDP 日志（使用 Plotter）
     unique_ptr<tools::Plotter> plotter;
     if (Config::get().udp.enabled) {
         plotter = make_unique<tools::Plotter>(Config::get().udp.host, Config::get().udp.port);
-        // Plotter 没有 isOpen() 方法，默认认为创建成功
         cout << "Plotter 已启用，目标 " << Config::get().udp.host << ":" << Config::get().udp.port << endl;
     } else {
         cout << "Plotter 发送已禁用" << endl;
@@ -122,7 +120,6 @@ int main() {
     double lastTime = getCurrentTimeSec();
     int frameCount = 0;
     double fps = 0.0;
-
     Point3f predPos(0, 0, 0);
 
     while (true) {
@@ -144,18 +141,27 @@ int main() {
         Mat binary = PreProcess::process(frame);
         vector<LightBar> lightBars = PreProcess::detectLightBars(binary);
 
+        frameCnt++;
+        if (Config::get().yolo.inference_interval == 0 ||
+            frameCnt % Config::get().yolo.inference_interval == 0) {
+            auto detections = yolo.detect(frame);
+            for (const auto& det : detections) {
+                rectangle(frame, det.box, Scalar(128, 128, 128), 2);
+            }
+        }
+
         vector<Armor> armors;
         if (tracker.isInitialized()) {
             armors = PreProcess::detectArmors(lightBars, &predPos);
         } else {
             armors = PreProcess::detectArmors(lightBars, nullptr);
         }
-
         drawArmor(armors, frame);
 
         bool hasTarget = false;
         Point3f measuredPos;
-        PnPResult pnpRes;
+        PnPResult pnpRes{};
+        double filteredYaw = 0.0, predictedYaw = 0.0;
 
         if (!armors.empty()) {
             const Armor& target = armors[0];
@@ -163,10 +169,8 @@ int main() {
             if (pnpRes.isValid) {
                 hasTarget = true;
                 measuredPos = pnpRes.position;
-
-                double filteredYaw = tracker.updateYaw(pnpRes.yaw, timeStamp);
-                double predictedYaw = tracker.predictYaw(timeStamp);
-
+                filteredYaw = tracker.updateYaw(pnpRes.yaw, timeStamp);
+                predictedYaw = tracker.predictYaw(timeStamp);
                 const auto& pts = target.armor_pts;
                 for (int i = 0; i < 4; i++) {
                     line(frame, pts[i], pts[(i+1)%4], Scalar(0, 255, 0), 2);
@@ -199,7 +203,7 @@ int main() {
             aim = angleSolver.calculateAimAngle(dummy);
         }
 
-        if (pnpRes.isValid) {
+        if (hasTarget) {
             cout << "PnP解算距离: " << pnpRes.distance << " mm" << endl;
             cout << "重力补偿前yaw: " << pnpRes.yaw << "度, pitch: " << pnpRes.pitch << "度" << endl;
         }
@@ -213,14 +217,20 @@ int main() {
             }
         }
 
-        // 使用 Plotter 发送 UDP 数据
         if (plotter) {
             nlohmann::json j;
             j["timestamp"] = timeStamp;
-            j["pnp_distance"] = pnpRes.isValid ? pnpRes.distance : 0.0;
-            j["pnp_yaw"] = pnpRes.isValid ? pnpRes.yaw : 0.0;
-            j["pnp_pitch"] = pnpRes.isValid ? pnpRes.pitch : 0.0;
-            j["pnp_roll"] = pnpRes.isValid ? pnpRes.roll : 0.0;
+            if (hasTarget) {
+                j["pnp_distance"] = pnpRes.distance;
+                j["pnp_yaw"] = pnpRes.yaw;
+                j["pnp_pitch"] = pnpRes.pitch;
+                j["pnp_roll"] = pnpRes.roll;
+            } else {
+                j["pnp_distance"] = 0.0;
+                j["pnp_yaw"] = 0.0;
+                j["pnp_pitch"] = 0.0;
+                j["pnp_roll"] = 0.0;
+            }
             j["aim_yaw"] = aim.yaw;
             j["aim_pitch"] = aim.pitch;
             j["est_x"] = estPos.x;
@@ -235,29 +245,26 @@ int main() {
         if (tracker.isInitialized()) {
             if (hasTarget) {
                 Point2f ptMeas = projectPoint(measuredPos, cameraMatrix, distCoeffs);
-                circle(frame, ptMeas, 5, Scalar(255, 0, 0), -1);
+                circle(frame, ptMeas, 3, Scalar(255, 0, 0), -1);
             }
             Point2f ptEst = projectPoint(estPos, cameraMatrix, distCoeffs);
-            circle(frame, ptEst, 5, Scalar(255, 255, 255), -1);
+            circle(frame, ptEst, 3, Scalar(255, 255, 255), -1);
             Point2f ptPred = projectPoint(predPos, cameraMatrix, distCoeffs);
-            circle(frame, ptPred, 5, Scalar(0, 0, 255), -1);
+            circle(frame, ptPred, 3, Scalar(0, 0, 255), -1);
         }
 
         if (tracker.isInitialized()) {
             const float armorWidth = 135.0f;
             const float armorHeight = 125.0f;
-
             vector<Point3f> objPts(4);
-            objPts[0] = estPos + Point3f(-armorWidth/2, -armorHeight/2, 0);
-            objPts[1] = estPos + Point3f( armorWidth/2, -armorHeight/2, 0);
-            objPts[2] = estPos + Point3f( armorWidth/2,  armorHeight/2, 0);
-            objPts[3] = estPos + Point3f(-armorWidth/2,  armorHeight/2, 0);
-
+            objPts[0] = predPos + Point3f(-armorWidth/2, -armorHeight/2, 0);
+            objPts[1] = predPos + Point3f( armorWidth/2, -armorHeight/2, 0);
+            objPts[2] = predPos + Point3f( armorWidth/2,  armorHeight/2, 0);
+            objPts[3] = predPos + Point3f(-armorWidth/2,  armorHeight/2, 0);
             vector<Point2f> imgPts;
             for (const auto& pt : objPts) {
                 imgPts.push_back(projectPoint(pt, cameraMatrix, distCoeffs));
             }
-
             vector<Point> intPts;
             for (const auto& pt : imgPts) {
                 intPts.push_back(Point(cvRound(pt.x), cvRound(pt.y)));
@@ -265,10 +272,10 @@ int main() {
             polylines(frame, intPts, true, Scalar(0, 255, 255), 2);
         }
 
-        if (pnpRes.isValid) {
+        if (hasTarget) {
             string posText = format("X:%.1f Y:%.1f Z:%.1f", pnpRes.position.x, pnpRes.position.y, pnpRes.position.z);
             putText(frame, posText, Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1, LINE_AA);
-            string angleText = format("Yaw: %.2f (raw) / %.2f (filt) / %.2f (pred)", pnpRes.yaw, pnpRes.filteredYaw, pnpRes.predictedYaw);
+            string angleText = format("Yaw: %.2f (raw) / %.2f (filt) / %.2f (pred)", pnpRes.yaw, filteredYaw, predictedYaw);
             putText(frame, angleText, Point(10, 50), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1, LINE_AA);
             string angleText2 = format("Pitch:%.2f Roll:%.2f", pnpRes.pitch, pnpRes.roll);
             putText(frame, angleText2, Point(10, 70), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1, LINE_AA);

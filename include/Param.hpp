@@ -25,18 +25,18 @@ struct Armor{
 };
 
 struct PnPResult {
-    Point3f position;          // 平移向量 (x, y, z) 单位：毫米
+    Point3f position = Point3f(0, 0, 0);          // 平移向量 (x, y, z) 单位：毫米
     Mat rotationVec;           // 旋转向量 (3x1)
     Mat rotationMatrix;        // 旋转矩阵 (3x3)
     Mat translationVec;        // 平移矩阵 (3x1)
-    double distance;               // 距离（毫米）
-    double yaw;                    // yaw（弧度）
-    double pitch;                  // pitch（弧度）
-    double roll;                   // roll（弧度）
-    double filteredYaw;
-    double predictedYaw;
-    bool isValid;                  // 是否有效
-    double reprojectionError;      // 重投影误差
+    double distance = 0.0;               // 距离（毫米）
+    double yaw = 0.0;                    // yaw（弧度）
+    double pitch = 0.0;                  // pitch（弧度）
+    double roll = 0.0;                   // roll（弧度）
+    double filteredYaw = 0.0;
+    double predictedYaw = 0.0;
+    bool isValid = false;                  // 是否有效
+    double reprojectionError = 0.0;      // 重投影误差
 };
 
 // 瞄准角度
