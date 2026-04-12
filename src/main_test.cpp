@@ -8,10 +8,8 @@
 #include "Config.hpp"
 #include "PreProcess.hpp"
 #include "PnPSolver.hpp"
-#include "KalmanTracker.hpp"
 #include "SerialPort.hpp"
 #include "plotter.hpp"
-#include "YoloDetector.hpp"
 
 using namespace std;
 using namespace cv;
@@ -40,7 +38,6 @@ bool loadCameraParams(const string& filename, Mat& cameraMatrix, Mat& distCoeffs
         distCoeffs = Mat::zeros(5, 1, CV_64F);
         return false;
     }
-
     fs["camera_matrix"] >> cameraMatrix;
     if (cameraMatrix.empty() || cameraMatrix.rows != 3 || cameraMatrix.cols != 3) {
         cerr << "【警告】文件中没有有效的 camera_matrix，将使用默认内参！" << endl;
@@ -49,7 +46,6 @@ bool loadCameraParams(const string& filename, Mat& cameraMatrix, Mat& distCoeffs
         fs.release();
         return false;
     }
-
     fs["dist_coeffs"] >> distCoeffs;
     if (distCoeffs.empty()) {
         cerr << "【警告】文件中没有有效的 dist_coeffs，将使用零向量！" << endl;
@@ -62,7 +58,6 @@ bool loadCameraParams(const string& filename, Mat& cameraMatrix, Mat& distCoeffs
             distCoeffs = Mat::zeros(5, 1, CV_64F);
         }
     }
-
     PreProcess::camera_matrix = cameraMatrix.clone();
     PreProcess::dist_coeffs = distCoeffs.clone();
     cout << "相机内参矩阵加载成功！" << endl;
@@ -97,17 +92,14 @@ int main() {
         cerr << "警告：PnP解算器使用默认相机内参" << endl;
     }
 
-    KalmanTracker tracker;
+    ExtendedKalmanFilter tracker;
     AngleSolver angleSolver;
-    YoloDetector yolo(Config::get().yolo);
-    int frameCnt = 0;
 
     SerialPort serial;
     if (!serial.open()) {
         cerr << "串口打开失败，将无法发送角度" << endl;
     }
 
-    // UDP 日志（使用 Plotter）
     unique_ptr<tools::Plotter> plotter;
     if (Config::get().udp.enabled) {
         plotter = make_unique<tools::Plotter>(Config::get().udp.host, Config::get().udp.port);
@@ -157,7 +149,7 @@ int main() {
 
         bool hasTarget = false;
         Point3f measuredPos;
-        PnPResult pnpRes;
+        PnPResult pnpRes{};
 
         if (!armors.empty()) {
             const Armor& target = armors[0];
@@ -166,8 +158,15 @@ int main() {
                 hasTarget = true;
                 measuredPos = pnpRes.position;
 
-                filteredYaw = tracker.updateYaw(pnpRes.yaw, timeStamp);
-                predictedYaw = tracker.predictYaw(timeStamp);
+                // 更新卡尔曼滤波器
+                if (!tracker.isInitialized()) {
+                    tracker.init(measuredPos, pnpRes.yaw, timeStamp);
+                } else {
+                    tracker.updatePosition(measuredPos, timeStamp);
+                    tracker.updateYaw(pnpRes.yaw, timeStamp);
+                }
+                filteredYaw = tracker.getEstimatedYaw();
+                predictedYaw = tracker.getPredictedYaw();
 
                 const auto& pts = target.armor_pts;
                 for (int i = 0; i < 4; i++) {
@@ -176,20 +175,16 @@ int main() {
             }
         }
 
-        Point3f estPos;
-        if (hasTarget) {
-            if (!tracker.isInitialized()) {
-                tracker.init(measuredPos, timeStamp);
-                estPos = measuredPos;
-                predPos = measuredPos;
-            } else {
-                estPos = tracker.update(measuredPos, timeStamp);
-                predPos = tracker.getPredictionPosition();
-            }
-        } else {
-            if (tracker.isInitialized()) {
-                predPos = tracker.predict(timeStamp);
+        // 获取估计位置和预测位置
+        Point3f estPos = tracker.getEstimatedPosition();
+        if (tracker.isInitialized()) {
+            if (!hasTarget) {
+                tracker.predict(timeStamp);
+                predPos = tracker.getPredictedPosition();
+                predictedYaw = tracker.getPredictedYaw();
                 estPos = tracker.getEstimatedPosition();
+            } else {
+                predPos = tracker.getPredictedPosition();
             }
         }
 
@@ -219,10 +214,17 @@ int main() {
         if (plotter) {
             nlohmann::json j;
             j["timestamp"] = timeStamp;
-            j["pnp_distance"] = pnpRes.isValid ? pnpRes.distance : 0.0;
-            j["pnp_yaw"] = pnpRes.isValid ? pnpRes.yaw : 0.0;
-            j["pnp_pitch"] = pnpRes.isValid ? pnpRes.pitch : 0.0;
-            j["pnp_roll"] = pnpRes.isValid ? pnpRes.roll : 0.0;
+            if (pnpRes.isValid) {
+                j["pnp_distance"] = pnpRes.distance;
+                j["pnp_yaw"] = pnpRes.yaw;
+                j["pnp_pitch"] = pnpRes.pitch;
+                j["pnp_roll"] = pnpRes.roll;
+            } else {
+                j["pnp_distance"] = 0.0;
+                j["pnp_yaw"] = 0.0;
+                j["pnp_pitch"] = 0.0;
+                j["pnp_roll"] = 0.0;
+            }
             j["aim_yaw"] = aim.yaw;
             j["aim_pitch"] = aim.pitch;
             j["est_x"] = estPos.x;
@@ -234,38 +236,31 @@ int main() {
             plotter->plot(j);
         }
 
-        // 绘制卡尔曼滤波点（无文字）
+        // 绘制卡尔曼滤波点
         if (tracker.isInitialized()) {
             if (hasTarget) {
                 Point2f ptMeas = projectPoint(measuredPos, cameraMatrix, distCoeffs);
-                circle(frame, ptMeas, 3, Scalar(255, 0, 0), -1);   // 蓝色：识别
+                circle(frame, ptMeas, 3, Scalar(255, 0, 0), -1);
             }
             Point2f ptEst = projectPoint(estPos, cameraMatrix, distCoeffs);
-            circle(frame, ptEst, 3, Scalar(255, 255, 255), -1);    // 白色：卡尔曼估计
+            circle(frame, ptEst, 3, Scalar(255, 255, 255), -1);
             Point2f ptPred = projectPoint(predPos, cameraMatrix, distCoeffs);
-            circle(frame, ptPred, 3, Scalar(0, 0, 255), -1);       // 红色：卡尔曼预测
+            circle(frame, ptPred, 3, Scalar(0, 0, 255), -1);
         }
 
         // 绘制卡尔曼预测的装甲板框（黄色）
         if (tracker.isInitialized()) {
             const float armorWidth = 135.0f;
             const float armorHeight = 125.0f;
-
             vector<Point3f> objPts(4);
             objPts[0] = predPos + Point3f(-armorWidth/2, -armorHeight/2, 0);
             objPts[1] = predPos + Point3f( armorWidth/2, -armorHeight/2, 0);
             objPts[2] = predPos + Point3f( armorWidth/2,  armorHeight/2, 0);
             objPts[3] = predPos + Point3f(-armorWidth/2,  armorHeight/2, 0);
-
             vector<Point2f> imgPts;
-            for (const auto& pt : objPts) {
-                imgPts.push_back(projectPoint(pt, cameraMatrix, distCoeffs));
-            }
-
+            for (const auto& pt : objPts) imgPts.push_back(projectPoint(pt, cameraMatrix, distCoeffs));
             vector<Point> intPts;
-            for (const auto& pt : imgPts) {
-                intPts.push_back(Point(cvRound(pt.x), cvRound(pt.y)));
-            }
+            for (const auto& pt : imgPts) intPts.push_back(Point(cvRound(pt.x), cvRound(pt.y)));
             polylines(frame, intPts, true, Scalar(0, 255, 255), 2);
         }
 
@@ -283,7 +278,7 @@ int main() {
         string windowName = "Armor Tracking - FPS: " + to_string((int)fps);
         setWindowTitle("Armor Tracking", windowName);
         imshow("Armor Tracking", frame);
-        char key = waitKey(50);
+        char key = waitKey(100);
         if (key == 'q' || key == 'Q') break;
     }
 

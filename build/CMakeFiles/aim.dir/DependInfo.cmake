@@ -11,11 +11,10 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/qiu/桌面/aim/src/CameraDriver.cpp" "CMakeFiles/aim.dir/src/CameraDriver.cpp.o" "gcc" "CMakeFiles/aim.dir/src/CameraDriver.cpp.o.d"
   "/home/qiu/桌面/aim/src/Config.cpp" "CMakeFiles/aim.dir/src/Config.cpp.o" "gcc" "CMakeFiles/aim.dir/src/Config.cpp.o.d"
   "/home/qiu/桌面/aim/src/EKF.cpp" "CMakeFiles/aim.dir/src/EKF.cpp.o" "gcc" "CMakeFiles/aim.dir/src/EKF.cpp.o.d"
-  "/home/qiu/桌面/aim/src/KalmanTracker.cpp" "CMakeFiles/aim.dir/src/KalmanTracker.cpp.o" "gcc" "CMakeFiles/aim.dir/src/KalmanTracker.cpp.o.d"
   "/home/qiu/桌面/aim/src/PnPSolver.cpp" "CMakeFiles/aim.dir/src/PnPSolver.cpp.o" "gcc" "CMakeFiles/aim.dir/src/PnPSolver.cpp.o.d"
   "/home/qiu/桌面/aim/src/PreProcess.cpp" "CMakeFiles/aim.dir/src/PreProcess.cpp.o" "gcc" "CMakeFiles/aim.dir/src/PreProcess.cpp.o.d"
   "/home/qiu/桌面/aim/src/SerialPort.cpp" "CMakeFiles/aim.dir/src/SerialPort.cpp.o" "gcc" "CMakeFiles/aim.dir/src/SerialPort.cpp.o.d"
-  "/home/qiu/桌面/aim/src/YoloDetector.cpp" "CMakeFiles/aim.dir/src/YoloDetector.cpp.o" "gcc" "CMakeFiles/aim.dir/src/YoloDetector.cpp.o.d"
+  "/home/qiu/桌面/aim/src/TargetSelect.cpp" "CMakeFiles/aim.dir/src/TargetSelect.cpp.o" "gcc" "CMakeFiles/aim.dir/src/TargetSelect.cpp.o.d"
   "/home/qiu/桌面/aim/src/main_test.cpp" "CMakeFiles/aim.dir/src/main_test.cpp.o" "gcc" "CMakeFiles/aim.dir/src/main_test.cpp.o.d"
   "/home/qiu/桌面/aim/src/plotter.cpp" "CMakeFiles/aim.dir/src/plotter.cpp.o" "gcc" "CMakeFiles/aim.dir/src/plotter.cpp.o.d"
   )

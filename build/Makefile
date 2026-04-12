@@ -201,30 +201,6 @@ src/EKF.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/EKF.cpp.s
 .PHONY : src/EKF.cpp.s
 
-src/KalmanTracker.o: src/KalmanTracker.cpp.o
-.PHONY : src/KalmanTracker.o
-
-# target to build an object file
-src/KalmanTracker.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/KalmanTracker.cpp.o
-.PHONY : src/KalmanTracker.cpp.o
-
-src/KalmanTracker.i: src/KalmanTracker.cpp.i
-.PHONY : src/KalmanTracker.i
-
-# target to preprocess a source file
-src/KalmanTracker.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/KalmanTracker.cpp.i
-.PHONY : src/KalmanTracker.cpp.i
-
-src/KalmanTracker.s: src/KalmanTracker.cpp.s
-.PHONY : src/KalmanTracker.s
-
-# target to generate assembly for a file
-src/KalmanTracker.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/KalmanTracker.cpp.s
-.PHONY : src/KalmanTracker.cpp.s
-
 src/PnPSolver.o: src/PnPSolver.cpp.o
 .PHONY : src/PnPSolver.o
 
@@ -297,29 +273,29 @@ src/SerialPort.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/SerialPort.cpp.s
 .PHONY : src/SerialPort.cpp.s
 
-src/YoloDetector.o: src/YoloDetector.cpp.o
-.PHONY : src/YoloDetector.o
+src/TargetSelect.o: src/TargetSelect.cpp.o
+.PHONY : src/TargetSelect.o
 
 # target to build an object file
-src/YoloDetector.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/YoloDetector.cpp.o
-.PHONY : src/YoloDetector.cpp.o
+src/TargetSelect.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/TargetSelect.cpp.o
+.PHONY : src/TargetSelect.cpp.o
 
-src/YoloDetector.i: src/YoloDetector.cpp.i
-.PHONY : src/YoloDetector.i
+src/TargetSelect.i: src/TargetSelect.cpp.i
+.PHONY : src/TargetSelect.i
 
 # target to preprocess a source file
-src/YoloDetector.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/YoloDetector.cpp.i
-.PHONY : src/YoloDetector.cpp.i
+src/TargetSelect.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/TargetSelect.cpp.i
+.PHONY : src/TargetSelect.cpp.i
 
-src/YoloDetector.s: src/YoloDetector.cpp.s
-.PHONY : src/YoloDetector.s
+src/TargetSelect.s: src/TargetSelect.cpp.s
+.PHONY : src/TargetSelect.s
 
 # target to generate assembly for a file
-src/YoloDetector.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/YoloDetector.cpp.s
-.PHONY : src/YoloDetector.cpp.s
+src/TargetSelect.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/TargetSelect.cpp.s
+.PHONY : src/TargetSelect.cpp.s
 
 src/main_test.o: src/main_test.cpp.o
 .PHONY : src/main_test.o
@@ -387,9 +363,6 @@ help:
 	@echo "... src/EKF.o"
 	@echo "... src/EKF.i"
 	@echo "... src/EKF.s"
-	@echo "... src/KalmanTracker.o"
-	@echo "... src/KalmanTracker.i"
-	@echo "... src/KalmanTracker.s"
 	@echo "... src/PnPSolver.o"
 	@echo "... src/PnPSolver.i"
 	@echo "... src/PnPSolver.s"
@@ -399,9 +372,9 @@ help:
 	@echo "... src/SerialPort.o"
 	@echo "... src/SerialPort.i"
 	@echo "... src/SerialPort.s"
-	@echo "... src/YoloDetector.o"
-	@echo "... src/YoloDetector.i"
-	@echo "... src/YoloDetector.s"
+	@echo "... src/TargetSelect.o"
+	@echo "... src/TargetSelect.i"
+	@echo "... src/TargetSelect.s"
 	@echo "... src/main_test.o"
 	@echo "... src/main_test.i"
 	@echo "... src/main_test.s"

@@ -1,137 +1,223 @@
 #include "EKF.hpp"
+#include "Config.hpp"
+#include <cmath>
 #include <iostream>
 
-ExtendedKalmanFilter::ExtendedKalmanFilter(int stateDim, int measDim, bool useLinear)
-    : m_stateDim(stateDim), m_measDim(measDim), m_useLinear(useLinear)
+ExtendedKalmanFilter::ExtendedKalmanFilter()
+    : m_x(cv::Mat::zeros(8, 1, CV_64F)),
+      m_P(cv::Mat::eye(8, 8, CV_64F)),
+      m_F(cv::Mat::eye(8, 8, CV_64F)),
+      m_H(cv::Mat::zeros(4, 8, CV_64F)),
+      m_Q(cv::Mat::eye(8, 8, CV_64F) * 1e-4),
+      m_R(cv::Mat::eye(4, 4, CV_64F) * 1e-2),
+      m_I(cv::Mat::eye(8, 8, CV_64F)),
+      m_lastTimePos(0),
+      m_lastTimeYaw(0),
+      m_dt(0),
+      m_predictedPose(0,0,0),
+      m_predictedYaw(0),
+      m_initialized(false),
+      m_yawInitialized(false)
 {
-    m_x = cv::Mat::zeros(stateDim, 1, CV_64F);
-    m_P = cv::Mat::eye(stateDim, stateDim, CV_64F);
-    m_F = cv::Mat::eye(stateDim, stateDim, CV_64F);
-    m_H = cv::Mat::zeros(measDim, stateDim, CV_64F);
-    m_Q = cv::Mat::eye(stateDim, stateDim, CV_64F) * 1e-4;
-    m_R = cv::Mat::eye(measDim, measDim, CV_64F) * 1e-2;
-    m_I = cv::Mat::eye(stateDim, stateDim, CV_64F);
+    loadParamsFromConfig();
+
+    // 观测矩阵 H (4x8)
+    m_H.at<double>(0,0) = 1.0;  // x
+    m_H.at<double>(1,1) = 1.0;  // y
+    m_H.at<double>(2,2) = 1.0;  // z
+    m_H.at<double>(3,6) = 1.0;  // yaw
 }
 
-void ExtendedKalmanFilter::setTransitionMatrix(const cv::Mat& F) { m_F = F.clone(); }
-void ExtendedKalmanFilter::setMeasurementMatrix(const cv::Mat& H) { m_H = H.clone(); }
-void ExtendedKalmanFilter::setProcessNoiseCov(const cv::Mat& Q) { m_Q = Q.clone(); }
-void ExtendedKalmanFilter::setMeasurementNoiseCov(const cv::Mat& R) { m_R = R.clone(); }
+void ExtendedKalmanFilter::loadParamsFromConfig() {
+    const auto& c = Config::get().kalman;
 
-void ExtendedKalmanFilter::setStateTransitionFunc(StateTransitionFunc f) { m_f = f; }
-void ExtendedKalmanFilter::setMeasurementFunc(MeasurementFunc h) { m_h = h; }
-void ExtendedKalmanFilter::setStateJacobianFunc(JacobianFunc Jf) { m_Jf = Jf; }
-void ExtendedKalmanFilter::setMeasurementJacobianFunc(JacobianFunc Jh) { m_Jh = Jh; }
+    // 过程噪声 Q (8x8)
+    m_Q.at<double>(0,0) = c.processNoisePos;
+    m_Q.at<double>(1,1) = c.processNoisePos;
+    m_Q.at<double>(2,2) = c.processNoisePos;
+    m_Q.at<double>(3,3) = c.processNoiseVel;
+    m_Q.at<double>(4,4) = c.processNoiseVel;
+    m_Q.at<double>(5,5) = c.processNoiseVel;
+    m_Q.at<double>(6,6) = c.yawProcessNoisePos;
+    m_Q.at<double>(7,7) = c.yawProcessNoiseVel;
 
-void ExtendedKalmanFilter::setState(const cv::Mat& x) { m_x = x.clone(); }
-void ExtendedKalmanFilter::setErrorCov(const cv::Mat& P) { m_P = P.clone(); }
+    // 观测噪声 R (4x4)
+    m_R.at<double>(0,0) = c.measurementNoisePos;
+    m_R.at<double>(1,1) = c.measurementNoisePos;
+    m_R.at<double>(2,2) = c.measurementNoisePos;
+    m_R.at<double>(3,3) = c.yawMeasurementNoise;
 
-cv::Mat ExtendedKalmanFilter::predict(double dt) {
-    cv::Mat F_current;
+    // 初始协方差 P
+    m_P = cv::Mat::eye(8, 8, CV_64F) * c.initialErrorCov;
 
-    if (m_useLinear) {
-        // 线性卡尔曼: x_k = F * x_{k-1}
-        F_current = m_F;
-
-        // 更新转移矩阵中的 dt 依赖项 (如果需要)
-        // 这里假设 m_F 已经根据 dt 设置好
-
-        m_x = F_current * m_x;
-        m_P = F_current * m_P * F_current.t() + m_Q;
-
-    } else {
-        // 扩展卡尔曼: x_k = f(x_{k-1}, dt)
-        if (!m_f) {
-            std::cerr << "[EKF] 状态转移函数未设置!" << std::endl;
-            return m_x;
-        }
-
-        cv::Mat x_pred = m_f(m_x, dt);
-
-        // 计算雅可比矩阵 J_f = df/dx
-        cv::Mat Jf;
-        if (m_Jf) {
-            Jf = m_Jf(m_x, dt);
-        } else {
-            // 数值雅可比 (如果未提供)
-            Jf = numericalJacobian(m_f, m_x, dt);
-        }
-
-        m_x = x_pred;
-        m_P = Jf * m_P * Jf.t() + m_Q;
-    }
-
-    return m_x;
+    std::cout << "[EKF] 初始化完成，参数: "
+              << "posNoise=" << c.processNoisePos
+              << ", velNoise=" << c.processNoiseVel
+              << ", measNoise=" << c.measurementNoisePos
+              << ", yawPosNoise=" << c.yawProcessNoisePos
+              << ", yawVelNoise=" << c.yawProcessNoiseVel
+              << ", yawMeasNoise=" << c.yawMeasurementNoise << std::endl;
 }
 
-cv::Mat ExtendedKalmanFilter::correct(const cv::Mat& z) {
-    cv::Mat H_current, z_pred;
+void ExtendedKalmanFilter::setTransitionMatrix(double dt) {
+    // 状态转移矩阵 F (8x8) 线性模型
+    cv::setIdentity(m_F);
+    m_F.at<double>(0,3) = dt;  // x += vx*dt
+    m_F.at<double>(1,4) = dt;  // y += vy*dt
+    m_F.at<double>(2,5) = dt;  // z += vz*dt
+    m_F.at<double>(6,7) = dt;  // yaw += yaw_vel*dt
+}
 
-    if (m_useLinear) {
-        // 线性卡尔曼: z = H * x
-        H_current = m_H;
-        z_pred = H_current * m_x;
+cv::Mat ExtendedKalmanFilter::stateTransition(const cv::Mat& x, double dt) {
+    cv::Mat x_new = x.clone();
+    x_new.at<double>(0) = x.at<double>(0) + x.at<double>(3) * dt;
+    x_new.at<double>(1) = x.at<double>(1) + x.at<double>(4) * dt;
+    x_new.at<double>(2) = x.at<double>(2) + x.at<double>(5) * dt;
+    x_new.at<double>(6) = x.at<double>(6) + x.at<double>(7) * dt;
+    return x_new;
+}
 
-    } else {
-        // 扩展卡尔曼: z = h(x)
-        if (!m_h) {
-            std::cerr << "[EKF] 观测函数未设置!" << std::endl;
-            return m_x;
-        }
+cv::Mat ExtendedKalmanFilter::stateJacobian(double dt) {
+    cv::Mat J = cv::Mat::eye(8, 8, CV_64F);
+    J.at<double>(0,3) = dt;
+    J.at<double>(1,4) = dt;
+    J.at<double>(2,5) = dt;
+    J.at<double>(6,7) = dt;
+    return J;
+}
 
-        z_pred = m_h(m_x);
+cv::Mat ExtendedKalmanFilter::measurementModel(const cv::Mat& x) {
+    cv::Mat z = cv::Mat::zeros(4, 1, CV_64F);
+    z.at<double>(0) = x.at<double>(0);
+    z.at<double>(1) = x.at<double>(1);
+    z.at<double>(2) = x.at<double>(2);
+    z.at<double>(3) = x.at<double>(6);
+    return z;
+}
 
-        // 计算雅可比矩阵 J_h = dh/dx
-        if (m_Jh) {
-            H_current = m_Jh(m_x, 0.0);
-        } else {
-            // 数值雅可比
-            auto h_wrapper = [this](const cv::Mat& x, double dt) -> cv::Mat {
-                return m_h(x);
-            };
-            H_current = numericalJacobian(h_wrapper, m_x, 0.0);
-        }
-    }
+cv::Mat ExtendedKalmanFilter::measurementJacobian() {
+    // 观测矩阵 H 是常数
+    return m_H;
+}
 
+void ExtendedKalmanFilter::predictState(double dt) {
+    // 状态预测
+    m_x = stateTransition(m_x, dt);
+    // 协方差预测
+    cv::Mat J = stateJacobian(dt);
+    m_P = J * m_P * J.t() + m_Q;
+}
+
+void ExtendedKalmanFilter::correct(const cv::Mat& z) {
     // 卡尔曼增益
-    cv::Mat S = H_current * m_P * H_current.t() + m_R;
-    cv::Mat K = m_P * H_current.t() * S.inv();
+    cv::Mat S = m_H * m_P * m_H.t() + m_R;
+    cv::Mat K = m_P * m_H.t() * S.inv();
+
+    // 新息
+    cv::Mat z_pred = measurementModel(m_x);
+    cv::Mat y = z - z_pred;
 
     // 状态更新
-    cv::Mat y = z - z_pred;  // 新息
     m_x = m_x + K * y;
 
-    // 协方差更新
-    m_P = (m_I - K * H_current) * m_P * (m_I - K * H_current).t() + K * m_R * K.t();
-
-    return m_x;
+    // 协方差更新 (Joseph form)
+    m_P = (m_I - K * m_H) * m_P * (m_I - K * m_H).t() + K * m_R * K.t();
 }
 
-// 数值雅可比计算 (用于扩展卡尔曼)
-cv::Mat ExtendedKalmanFilter::numericalJacobian(
-    std::function<cv::Mat(const cv::Mat&, double)> func,
-    const cv::Mat& x,
-    double dt)
-{
-    const double eps = 1e-6;
-    cv::Mat J = cv::Mat::zeros(m_measDim, m_stateDim, CV_64F);
+void ExtendedKalmanFilter::init(const cv::Point3f& position, double yaw, double timeStamp) {
+    m_x.at<double>(0) = position.x;
+    m_x.at<double>(1) = position.y;
+    m_x.at<double>(2) = position.z;
+    m_x.at<double>(3) = 0.0;  // vx
+    m_x.at<double>(4) = 0.0;  // vy
+    m_x.at<double>(5) = 0.0;  // vz
+    m_x.at<double>(6) = yaw;
+    m_x.at<double>(7) = 0.0;  // yaw_vel
 
-    cv::Mat x_perturbed = x.clone();
-    cv::Mat f_base = func(x, dt);
+    m_lastTimePos = timeStamp;
+    m_lastTimeYaw = timeStamp;
+    m_predictedPose = position;
+    m_predictedYaw = yaw;
+    m_initialized = true;
+    m_yawInitialized = true;
+}
 
-    for (int j = 0; j < m_stateDim; ++j) {
-        // 正向扰动
-        x_perturbed.at<double>(j) = x.at<double>(j) + eps;
-        cv::Mat f_plus = func(x_perturbed, dt);
+void ExtendedKalmanFilter::predict(double timeStamp) {
+    if (!m_initialized) return;
 
-        // 计算数值导数: (f(x+eps) - f(x)) / eps
-        for (int i = 0; i < (m_useLinear ? m_stateDim : m_measDim); ++i) {
-            J.at<double>(i, j) = (f_plus.at<double>(i) - f_base.at<double>(i)) / eps;
-        }
+    // 计算 dt（使用位置时间戳，因为两者共用）
+    double dt = timeStamp - m_lastTimePos;
+    if (dt > 0.1) dt = 0.033;
+    if (dt < 0.001) dt = 0.033;
 
-        // 恢复原始值
-        x_perturbed.at<double>(j) = x.at<double>(j);
+    setTransitionMatrix(dt);
+    predictState(dt);
+
+    // 提取预测的位置和 yaw
+    m_predictedPose.x = m_x.at<double>(0);
+    m_predictedPose.y = m_x.at<double>(1);
+    m_predictedPose.z = m_x.at<double>(2);
+    m_predictedYaw = m_x.at<double>(6);
+
+    m_lastTimePos = timeStamp;
+    m_lastTimeYaw = timeStamp;
+}
+
+void ExtendedKalmanFilter::updatePosition(const cv::Point3f& measuredPos, double timeStamp) {
+    if (!m_initialized) {
+        init(measuredPos, 0.0, timeStamp);
+        return;
     }
 
-    return J;
+    // 先预测到当前时间
+    predict(timeStamp);
+
+    // 构造观测向量 (位置部分)
+    cv::Mat z = cv::Mat::zeros(4, 1, CV_64F);
+    z.at<double>(0) = measuredPos.x;
+    z.at<double>(1) = measuredPos.y;
+    z.at<double>(2) = measuredPos.z;
+    z.at<double>(3) = m_x.at<double>(6);  // yaw 保持原值
+
+    correct(z);
+}
+
+void ExtendedKalmanFilter::updateYaw(double measuredYaw, double timeStamp) {
+    if (!m_yawInitialized) {
+        // 若尚未初始化 yaw，但位置可能已初始化，则仅设置 yaw
+        m_x.at<double>(6) = measuredYaw;
+        m_x.at<double>(7) = 0.0;
+        m_lastTimeYaw = timeStamp;
+        m_predictedYaw = measuredYaw;
+        m_yawInitialized = true;
+        return;
+    }
+
+    // 预测到当前时间（使用 yaw 时间戳）
+    double dt = timeStamp - m_lastTimeYaw;
+    if (dt > 0.1) dt = 0.033;
+    if (dt < 0.001) dt = 0.033;
+    setTransitionMatrix(dt);
+    predictState(dt);
+
+    // 构造观测向量 (yaw 部分)
+    cv::Mat z = cv::Mat::zeros(4, 1, CV_64F);
+    z.at<double>(0) = m_x.at<double>(0);  // 位置不变
+    z.at<double>(1) = m_x.at<double>(1);
+    z.at<double>(2) = m_x.at<double>(2);
+    z.at<double>(3) = measuredYaw;
+
+    correct(z);
+
+    m_lastTimeYaw = timeStamp;
+}
+
+cv::Point3f ExtendedKalmanFilter::getEstimatedPosition() const {
+    if (!m_initialized) return cv::Point3f(0,0,0);
+    return cv::Point3f(m_x.at<double>(0), m_x.at<double>(1), m_x.at<double>(2));
+}
+
+double ExtendedKalmanFilter::getEstimatedYaw() const {
+    if (!m_yawInitialized) return 0.0;
+    return m_x.at<double>(6);
 }

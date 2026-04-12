@@ -2,68 +2,66 @@
 
 #include <opencv2/opencv.hpp>
 #include <functional>
+#include <memory>
 
 class ExtendedKalmanFilter {
 public:
-    // 构造函数
-    ExtendedKalmanFilter(int stateDim, int measDim, bool useLinear = true);
+    ExtendedKalmanFilter();
+    ~ExtendedKalmanFilter() = default;
 
-    // ===== 线性卡尔曼滤波器接口 =====
-    void setTransitionMatrix(const cv::Mat& F);
-    void setMeasurementMatrix(const cv::Mat& H);
-    void setProcessNoiseCov(const cv::Mat& Q);
-    void setMeasurementNoiseCov(const cv::Mat& R);
+    // 初始化状态（位置和 yaw）
+    void init(const cv::Point3f& position, double yaw, double timeStamp);
 
-    // ===== 扩展卡尔曼滤波器接口 (非线性) =====
-    // 设置非线性状态转移函数: x_k = f(x_{k-1}, dt)
-    using StateTransitionFunc = std::function<cv::Mat(const cv::Mat& x, double dt)>;
-    void setStateTransitionFunc(StateTransitionFunc f);
+    // 预测下一时刻状态（位置和 yaw）
+    void predict(double timeStamp);
 
-    // 设置非线性观测函数: z = h(x)
-    using MeasurementFunc = std::function<cv::Mat(const cv::Mat& x)>;
-    void setMeasurementFunc(MeasurementFunc h);
+    // 更新位置观测
+    void updatePosition(const cv::Point3f& measuredPos, double timeStamp);
 
-    // 设置雅可比矩阵计算函数: J_f = df/dx, J_h = dh/dx
-    using JacobianFunc = std::function<cv::Mat(const cv::Mat& x, double dt)>;
-    void setStateJacobianFunc(JacobianFunc Jf);
-    void setMeasurementJacobianFunc(JacobianFunc Jh);
+    // 更新 yaw 观测
+    void updateYaw(double measuredYaw, double timeStamp);
 
-    // ===== 通用接口 =====
-    void setState(const cv::Mat& x);
-    void setErrorCov(const cv::Mat& P);
+    // 获取估计值
+    cv::Point3f getEstimatedPosition() const;
+    double getEstimatedYaw() const;
 
-    cv::Mat predict(double dt = 1.0);
-    cv::Mat correct(const cv::Mat& z);
+    // 获取预测值
+    cv::Point3f getPredictedPosition() const { return m_predictedPose; }
+    double getPredictedYaw() const { return m_predictedYaw; }
 
-    cv::Mat getState() const { return m_x; }
-    cv::Mat getErrorCov() const { return m_P; }
-    bool isLinear() const { return m_useLinear; }
+    bool isInitialized() const { return m_initialized; }
+    bool isYawInitialized() const { return m_yawInitialized; }
 
 private:
-    int m_stateDim;
-    int m_measDim;
-    bool m_useLinear;  // true=线性KF, false=扩展EKF
+    // 卡尔曼滤波核心
+    cv::Mat m_x;       // 状态向量 (8x1)
+    cv::Mat m_P;       // 误差协方差 (8x8)
+    cv::Mat m_F;       // 状态转移矩阵 (8x8)
+    cv::Mat m_H;       // 观测矩阵 (4x8)
+    cv::Mat m_Q;       // 过程噪声 (8x8)
+    cv::Mat m_R;       // 观测噪声 (4x4)
+    cv::Mat m_I;       // 单位矩阵 (8x8)
 
-    cv::Mat m_x;       // 状态向量
-    cv::Mat m_P;       // 误差协方差
-    cv::Mat m_F;       // 状态转移矩阵 (线性)
-    cv::Mat m_H;       // 观测矩阵 (线性)
-    cv::Mat m_Q;       // 过程噪声协方差
-    cv::Mat m_R;       // 观测噪声协方差
-    cv::Mat m_I;       // 单位矩阵
+    // 非线性函数（线性化模型，实际为线性）
+    cv::Mat stateTransition(const cv::Mat& x, double dt);
+    cv::Mat measurementModel(const cv::Mat& x);
+    cv::Mat stateJacobian(double dt);
+    cv::Mat measurementJacobian();
 
-    // 非线性函数
-    StateTransitionFunc m_f;    // 状态转移函数
-    MeasurementFunc m_h;       // 观测函数
-    JacobianFunc m_Jf;         // 状态雅可比矩阵函数
-    JacobianFunc m_Jh;         // 观测雅可比矩阵函数
+    // 时间管理
+    double m_lastTimePos;
+    double m_lastTimeYaw;
+    double m_dt;
 
-    // 数值雅可比计算
-    cv::Mat numericalJacobian(
-        std::function<cv::Mat(const cv::Mat&, double)> func,
-        const cv::Mat& x,
-        double dt);
+    // 预测/估计结果缓存
+    cv::Point3f m_predictedPose;
+    double m_predictedYaw;
+
+    bool m_initialized;
+    bool m_yawInitialized;
+
+    void loadParamsFromConfig();
+    void setTransitionMatrix(double dt);
+    void predictState(double dt);
+    void correct(const cv::Mat& z);
 };
-
-// 保留 EKF 作为别名以兼容旧代码
-using EKF = ExtendedKalmanFilter;

@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = -DJSON_DIAGNOSTICS=0 -DJSON_USE_IMPLICIT_CONVERSIONS=1
 
-CXX_INCLUDES = -I/home/qiu/桌面/aim/include -I/home/qiu/桌面/aim/MindVisionSdk -I/usr/local/include/onnxruntime -isystem /usr/local/include/opencv4
+CXX_INCLUDES = -I/home/qiu/桌面/aim/include -I/home/qiu/桌面/aim/MindVisionSdk/include -isystem /usr/local/include/opencv4
 
 CXX_FLAGS = -std=gnu++14
 

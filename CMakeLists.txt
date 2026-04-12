@@ -6,45 +6,35 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
-# 查找依赖包
 find_package(OpenCV REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(nlohmann_json REQUIRED)
-# 查找 ONNX Runtime
-find_library(ONNXRUNTIME_LIB onnxruntime /usr/local/lib)
 
-# 包含头文件目录
 include_directories(
     ${CMAKE_SOURCE_DIR}/include
     ${OpenCV_INCLUDE_DIRS}
     ${YAML_CPP_INCLUDE_DIRS}
-    ${CMAKE_SOURCE_DIR}/MindVisionSdk
-    /usr/local/include/onnxruntime   # ONNX Runtime 头文件路径
+    ${CMAKE_SOURCE_DIR}/MindVisionSdk/include
 )
 
-# 收集所有源文件
 set(SOURCES
     src/Config.cpp
     src/CameraDriver.cpp
     src/EKF.cpp
-    src/KalmanTracker.cpp
     src/PnPSolver.cpp
     src/PreProcess.cpp
     src/SerialPort.cpp
     src/plotter.cpp
-    src/YoloDetector.cpp              # 添加 YOLO 源文件
+    src/TargetSelect.cpp
     src/main_test.cpp
 )
 
-# 生成可执行文件
 add_executable(${PROJECT_NAME} ${SOURCES})
 
-# 链接库
 target_link_libraries(${PROJECT_NAME}
     ${OpenCV_LIBS}
     ${YAML_CPP_LIBRARIES}
     ${CMAKE_SOURCE_DIR}/MindVisionSdk/lib/x64/libMVSDK.so
     nlohmann_json::nlohmann_json
-    ${ONNXRUNTIME_LIB}               # 链接 ONNX Runtime
     pthread
 )

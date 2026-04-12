@@ -12,7 +12,7 @@ public:
     SerialPort();
     ~SerialPort();
 
-    // 打开串口（自动从 Config 读取 port 和 baud）
+    // 打开串口
     bool open();
 
     // 关闭串口
@@ -32,6 +32,6 @@ private:
     string m_port;           // 串口设备名
     int m_baudrate;               // 波特率
 
-    // 计算校验和（异或）
+    // 计算校验和
     uint8_t calcChecksum(const uint8_t* data, size_t len) const;
 };

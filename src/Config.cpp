@@ -46,7 +46,6 @@ void Config::loadYaml(const string& file_name){
         armor.max_center_bar_ratio = node["armor"]["max_center_bar_ratio"].as<float>();
         armor.min_center_bar_ratio = node["armor"]["min_center_bar_ratio"].as<float>();
 
-        // 读取 ballistic 节点（注意节点名与 YAML 一致，这里使用小写）
         ballistic.bulletSpeed = node["ballistic"]["bulletSpeed"].as<float>();
         ballistic.gravity = node["ballistic"]["gravity"].as<float>();
         ballistic.cameraOffsetX = node["ballistic"]["camera_offset_x"].as<float>();
@@ -61,18 +60,15 @@ void Config::loadYaml(const string& file_name){
         kalman.yawProcessNoisePos = node["kalman"]["yawProcessNoisePos"].as<float>();
         kalman.yawProcessNoiseVel = node["kalman"]["yawProcessNoiseVel"].as<float>();
         kalman.yawMeasurementNoise = node["kalman"]["yawMeasurementNoise"].as<float>();
-        kalman.yawProcessNoisePos = node["kalman"]["yawProcessNoisePos"].as<float>();
-        kalman.yawProcessNoiseVel = node["kalman"]["yawProcessNoiseVel"].as<float>();
-        kalman.yawMeasurementNoise = node["kalman"]["yawMeasurementNoise"].as<float>();
 
-        yolo.model_path = node["yolo"]["model_path"].as<std::string>();
-        yolo.conf_threshold = node["yolo"]["conf_threshold"].as<float>();
-        yolo.nms_threshold = node["yolo"]["nms_threshold"].as<float>();
-        yolo.input_width = node["yolo"]["input_width"].as<int>();
-        yolo.input_height = node["yolo"]["input_height"].as<int>();
-        yolo.inference_interval = node["yolo"]["inference_interval"].as<int>();
+        target_select.w_center = node["target_select"]["w_center"].as<float>();
+        target_select.w_distance = node["target_select"]["w_distance"].as<float>();
+        target_select.w_stability = node["target_select"]["w_stability"].as<float>();
+        target_select.hysteresis = node["target_select"]["hysteresis"].as<float>();
+        target_select.max_tracked = node["target_select"]["max_tracked"].as<int>();
+        target_select.max_distance_mm = node["target_select"]["max_distance_mm"].as<float>();
+        target_select.lost_timeout_ms = node["target_select"]["lost_timeout_ms"].as<int>();
 
-        // 读取 UDP 配置
         if (node["udp"]) {
             udp.enabled = node["udp"]["enabled"].as<bool>();
             udp.host = node["udp"]["host"].as<string>();

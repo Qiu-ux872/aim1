@@ -111,24 +111,10 @@ CMakeFiles/aim.dir/src/EKF.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/aim.dir/src/EKF.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/qiu/桌面/aim/src/EKF.cpp -o CMakeFiles/aim.dir/src/EKF.cpp.s
 
-CMakeFiles/aim.dir/src/KalmanTracker.cpp.o: CMakeFiles/aim.dir/flags.make
-CMakeFiles/aim.dir/src/KalmanTracker.cpp.o: ../src/KalmanTracker.cpp
-CMakeFiles/aim.dir/src/KalmanTracker.cpp.o: CMakeFiles/aim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/qiu/桌面/aim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/aim.dir/src/KalmanTracker.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/aim.dir/src/KalmanTracker.cpp.o -MF CMakeFiles/aim.dir/src/KalmanTracker.cpp.o.d -o CMakeFiles/aim.dir/src/KalmanTracker.cpp.o -c /home/qiu/桌面/aim/src/KalmanTracker.cpp
-
-CMakeFiles/aim.dir/src/KalmanTracker.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/aim.dir/src/KalmanTracker.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/qiu/桌面/aim/src/KalmanTracker.cpp > CMakeFiles/aim.dir/src/KalmanTracker.cpp.i
-
-CMakeFiles/aim.dir/src/KalmanTracker.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/aim.dir/src/KalmanTracker.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/qiu/桌面/aim/src/KalmanTracker.cpp -o CMakeFiles/aim.dir/src/KalmanTracker.cpp.s
-
 CMakeFiles/aim.dir/src/PnPSolver.cpp.o: CMakeFiles/aim.dir/flags.make
 CMakeFiles/aim.dir/src/PnPSolver.cpp.o: ../src/PnPSolver.cpp
 CMakeFiles/aim.dir/src/PnPSolver.cpp.o: CMakeFiles/aim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/qiu/桌面/aim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/aim.dir/src/PnPSolver.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/qiu/桌面/aim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/aim.dir/src/PnPSolver.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/aim.dir/src/PnPSolver.cpp.o -MF CMakeFiles/aim.dir/src/PnPSolver.cpp.o.d -o CMakeFiles/aim.dir/src/PnPSolver.cpp.o -c /home/qiu/桌面/aim/src/PnPSolver.cpp
 
 CMakeFiles/aim.dir/src/PnPSolver.cpp.i: cmake_force
@@ -142,7 +128,7 @@ CMakeFiles/aim.dir/src/PnPSolver.cpp.s: cmake_force
 CMakeFiles/aim.dir/src/PreProcess.cpp.o: CMakeFiles/aim.dir/flags.make
 CMakeFiles/aim.dir/src/PreProcess.cpp.o: ../src/PreProcess.cpp
 CMakeFiles/aim.dir/src/PreProcess.cpp.o: CMakeFiles/aim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/qiu/桌面/aim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/aim.dir/src/PreProcess.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/qiu/桌面/aim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/aim.dir/src/PreProcess.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/aim.dir/src/PreProcess.cpp.o -MF CMakeFiles/aim.dir/src/PreProcess.cpp.o.d -o CMakeFiles/aim.dir/src/PreProcess.cpp.o -c /home/qiu/桌面/aim/src/PreProcess.cpp
 
 CMakeFiles/aim.dir/src/PreProcess.cpp.i: cmake_force
@@ -156,7 +142,7 @@ CMakeFiles/aim.dir/src/PreProcess.cpp.s: cmake_force
 CMakeFiles/aim.dir/src/SerialPort.cpp.o: CMakeFiles/aim.dir/flags.make
 CMakeFiles/aim.dir/src/SerialPort.cpp.o: ../src/SerialPort.cpp
 CMakeFiles/aim.dir/src/SerialPort.cpp.o: CMakeFiles/aim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/qiu/桌面/aim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/aim.dir/src/SerialPort.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/qiu/桌面/aim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/aim.dir/src/SerialPort.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/aim.dir/src/SerialPort.cpp.o -MF CMakeFiles/aim.dir/src/SerialPort.cpp.o.d -o CMakeFiles/aim.dir/src/SerialPort.cpp.o -c /home/qiu/桌面/aim/src/SerialPort.cpp
 
 CMakeFiles/aim.dir/src/SerialPort.cpp.i: cmake_force
@@ -170,7 +156,7 @@ CMakeFiles/aim.dir/src/SerialPort.cpp.s: cmake_force
 CMakeFiles/aim.dir/src/plotter.cpp.o: CMakeFiles/aim.dir/flags.make
 CMakeFiles/aim.dir/src/plotter.cpp.o: ../src/plotter.cpp
 CMakeFiles/aim.dir/src/plotter.cpp.o: CMakeFiles/aim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/qiu/桌面/aim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/aim.dir/src/plotter.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/qiu/桌面/aim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/aim.dir/src/plotter.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/aim.dir/src/plotter.cpp.o -MF CMakeFiles/aim.dir/src/plotter.cpp.o.d -o CMakeFiles/aim.dir/src/plotter.cpp.o -c /home/qiu/桌面/aim/src/plotter.cpp
 
 CMakeFiles/aim.dir/src/plotter.cpp.i: cmake_force
@@ -181,24 +167,24 @@ CMakeFiles/aim.dir/src/plotter.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/aim.dir/src/plotter.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/qiu/桌面/aim/src/plotter.cpp -o CMakeFiles/aim.dir/src/plotter.cpp.s
 
-CMakeFiles/aim.dir/src/YoloDetector.cpp.o: CMakeFiles/aim.dir/flags.make
-CMakeFiles/aim.dir/src/YoloDetector.cpp.o: ../src/YoloDetector.cpp
-CMakeFiles/aim.dir/src/YoloDetector.cpp.o: CMakeFiles/aim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/qiu/桌面/aim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/aim.dir/src/YoloDetector.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/aim.dir/src/YoloDetector.cpp.o -MF CMakeFiles/aim.dir/src/YoloDetector.cpp.o.d -o CMakeFiles/aim.dir/src/YoloDetector.cpp.o -c /home/qiu/桌面/aim/src/YoloDetector.cpp
+CMakeFiles/aim.dir/src/TargetSelect.cpp.o: CMakeFiles/aim.dir/flags.make
+CMakeFiles/aim.dir/src/TargetSelect.cpp.o: ../src/TargetSelect.cpp
+CMakeFiles/aim.dir/src/TargetSelect.cpp.o: CMakeFiles/aim.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/qiu/桌面/aim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/aim.dir/src/TargetSelect.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/aim.dir/src/TargetSelect.cpp.o -MF CMakeFiles/aim.dir/src/TargetSelect.cpp.o.d -o CMakeFiles/aim.dir/src/TargetSelect.cpp.o -c /home/qiu/桌面/aim/src/TargetSelect.cpp
 
-CMakeFiles/aim.dir/src/YoloDetector.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/aim.dir/src/YoloDetector.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/qiu/桌面/aim/src/YoloDetector.cpp > CMakeFiles/aim.dir/src/YoloDetector.cpp.i
+CMakeFiles/aim.dir/src/TargetSelect.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/aim.dir/src/TargetSelect.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/qiu/桌面/aim/src/TargetSelect.cpp > CMakeFiles/aim.dir/src/TargetSelect.cpp.i
 
-CMakeFiles/aim.dir/src/YoloDetector.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/aim.dir/src/YoloDetector.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/qiu/桌面/aim/src/YoloDetector.cpp -o CMakeFiles/aim.dir/src/YoloDetector.cpp.s
+CMakeFiles/aim.dir/src/TargetSelect.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/aim.dir/src/TargetSelect.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/qiu/桌面/aim/src/TargetSelect.cpp -o CMakeFiles/aim.dir/src/TargetSelect.cpp.s
 
 CMakeFiles/aim.dir/src/main_test.cpp.o: CMakeFiles/aim.dir/flags.make
 CMakeFiles/aim.dir/src/main_test.cpp.o: ../src/main_test.cpp
 CMakeFiles/aim.dir/src/main_test.cpp.o: CMakeFiles/aim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/qiu/桌面/aim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/aim.dir/src/main_test.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/qiu/桌面/aim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/aim.dir/src/main_test.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/aim.dir/src/main_test.cpp.o -MF CMakeFiles/aim.dir/src/main_test.cpp.o.d -o CMakeFiles/aim.dir/src/main_test.cpp.o -c /home/qiu/桌面/aim/src/main_test.cpp
 
 CMakeFiles/aim.dir/src/main_test.cpp.i: cmake_force
@@ -214,12 +200,11 @@ aim_OBJECTS = \
 "CMakeFiles/aim.dir/src/Config.cpp.o" \
 "CMakeFiles/aim.dir/src/CameraDriver.cpp.o" \
 "CMakeFiles/aim.dir/src/EKF.cpp.o" \
-"CMakeFiles/aim.dir/src/KalmanTracker.cpp.o" \
 "CMakeFiles/aim.dir/src/PnPSolver.cpp.o" \
 "CMakeFiles/aim.dir/src/PreProcess.cpp.o" \
 "CMakeFiles/aim.dir/src/SerialPort.cpp.o" \
 "CMakeFiles/aim.dir/src/plotter.cpp.o" \
-"CMakeFiles/aim.dir/src/YoloDetector.cpp.o" \
+"CMakeFiles/aim.dir/src/TargetSelect.cpp.o" \
 "CMakeFiles/aim.dir/src/main_test.cpp.o"
 
 # External object files for target aim
@@ -228,12 +213,11 @@ aim_EXTERNAL_OBJECTS =
 ../bin/aim: CMakeFiles/aim.dir/src/Config.cpp.o
 ../bin/aim: CMakeFiles/aim.dir/src/CameraDriver.cpp.o
 ../bin/aim: CMakeFiles/aim.dir/src/EKF.cpp.o
-../bin/aim: CMakeFiles/aim.dir/src/KalmanTracker.cpp.o
 ../bin/aim: CMakeFiles/aim.dir/src/PnPSolver.cpp.o
 ../bin/aim: CMakeFiles/aim.dir/src/PreProcess.cpp.o
 ../bin/aim: CMakeFiles/aim.dir/src/SerialPort.cpp.o
 ../bin/aim: CMakeFiles/aim.dir/src/plotter.cpp.o
-../bin/aim: CMakeFiles/aim.dir/src/YoloDetector.cpp.o
+../bin/aim: CMakeFiles/aim.dir/src/TargetSelect.cpp.o
 ../bin/aim: CMakeFiles/aim.dir/src/main_test.cpp.o
 ../bin/aim: CMakeFiles/aim.dir/build.make
 ../bin/aim: /usr/local/lib/libopencv_gapi.so.4.6.0
@@ -246,7 +230,6 @@ aim_EXTERNAL_OBJECTS =
 ../bin/aim: /usr/local/lib/libopencv_videoio.so.4.6.0
 ../bin/aim: /usr/lib/x86_64-linux-gnu/libyaml-cpp.so.0.7.0
 ../bin/aim: ../MindVisionSdk/lib/x64/libMVSDK.so
-../bin/aim: /usr/local/lib/libonnxruntime.so
 ../bin/aim: /usr/local/lib/libopencv_imgcodecs.so.4.6.0
 ../bin/aim: /usr/local/lib/libopencv_dnn.so.4.6.0
 ../bin/aim: /usr/local/lib/libopencv_calib3d.so.4.6.0
@@ -255,7 +238,7 @@ aim_EXTERNAL_OBJECTS =
 ../bin/aim: /usr/local/lib/libopencv_imgproc.so.4.6.0
 ../bin/aim: /usr/local/lib/libopencv_core.so.4.6.0
 ../bin/aim: CMakeFiles/aim.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/qiu/桌面/aim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Linking CXX executable ../bin/aim"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/qiu/桌面/aim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Linking CXX executable ../bin/aim"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/aim.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

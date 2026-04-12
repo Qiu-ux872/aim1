@@ -4,19 +4,19 @@
 #include <opencv2/opencv.hpp>
 #include <nlohmann/json.hpp>
 
-#include "EKF.hpp"
 #include "Config.hpp"
 #include "CameraDriver.hpp"
 #include "PreProcess.hpp"
 #include "PnPSolver.hpp"
-#include "KalmanTracker.hpp"
+#include "EKF.hpp"
 #include "SerialPort.hpp"
 #include "plotter.hpp"
-#include "YoloDetector.hpp"
+#include "TargetSelect.hpp"
 
 using namespace std;
 using namespace cv;
 
+// 辅助函数 绘制装甲板
 void drawArmor(const vector<Armor>& armors, Mat& frame){
     for(const auto& armor : armors){
         circle(frame, armor.armor_center, 5, Scalar(0, 0, 255), -1);
@@ -28,11 +28,13 @@ void drawArmor(const vector<Armor>& armors, Mat& frame){
     }
 }
 
+// 获取当前时间戳
 double getCurrentTimeSec() {
     auto now = chrono::steady_clock::now();
     return chrono::duration<double>(now.time_since_epoch()).count();
 }
 
+// 加载相机参数
 bool loadCameraParams(const string& filename, Mat& cameraMatrix, Mat& distCoeffs) {
     FileStorage fs(filename, FileStorage::READ);
     if (!fs.isOpened()) {
@@ -67,6 +69,7 @@ bool loadCameraParams(const string& filename, Mat& cameraMatrix, Mat& distCoeffs
     return true;
 }
 
+// 3D点投影到2D
 Point2f projectPoint(const Point3f& pt, const Mat& cameraMatrix, const Mat& distCoeffs) {
     vector<Point3f> pts3d = {pt};
     vector<Point2f> pts2d;
@@ -97,10 +100,9 @@ int main() {
         cerr << "警告：PnP解算器使用默认相机内参" << endl;
     }
 
-    KalmanTracker tracker;
-    AngleSolver angleSolver;
-    YoloDetector yolo(Config::get().yolo);
-    int frameCnt = 0;
+    ExtendedKalmanFilter tracker;   // 目标跟踪器
+    AngleSolver angleSolver;        // 角度解算器
+    TargetSelector targetSelector(Config::get());   // 目标选择器
 
     SerialPort serial;
     if (!serial.open()) {
@@ -117,21 +119,22 @@ int main() {
 
     namedWindow("Armor Tracking", WINDOW_NORMAL);
 
-    double lastTime = getCurrentTimeSec();
-    int frameCount = 0;
-    double fps = 0.0;
-    Point3f predPos(0, 0, 0);
+    double lastTime = getCurrentTimeSec();  // 用于计算FPS
+    int frameCount = 0;                     // 预测位置和预测yaw
+    double fps = 0.0;                       // 当前FPS
+    Point3f predPos(0,0,0);                 // 预测位置
+    double predictedYaw = 0.0;              // 预测yaw
 
     while (true) {
         double timeStamp = getCurrentTimeSec();
         frameCount++;
-
         if (timeStamp - lastTime >= 1.0) {
             fps = frameCount / (timeStamp - lastTime);
             frameCount = 0;
             lastTime = timeStamp;
         }
 
+        // 捕获图像
         Mat frame = camera.capture(1000);
         if (frame.empty()) {
             cerr << "捕获图像超时，继续等待..." << endl;
@@ -140,64 +143,74 @@ int main() {
 
         Mat binary = PreProcess::process(frame);
         vector<LightBar> lightBars = PreProcess::detectLightBars(binary);
-
-        frameCnt++;
-        if (Config::get().yolo.inference_interval == 0 ||
-            frameCnt % Config::get().yolo.inference_interval == 0) {
-            auto detections = yolo.detect(frame);
-            for (const auto& det : detections) {
-                rectangle(frame, det.box, Scalar(128, 128, 128), 2);
-            }
-        }
-
         vector<Armor> armors;
         if (tracker.isInitialized()) {
             armors = PreProcess::detectArmors(lightBars, &predPos);
         } else {
             armors = PreProcess::detectArmors(lightBars, nullptr);
         }
+
         drawArmor(armors, frame);
+
+        // 为每个装甲板进行 PnP 解算并填充距离
+        for (auto& armor : armors) {
+            PnPResult res = pnpSolver.solveArmorPnP(armor);
+            if (res.isValid) {
+                armor.distance_mm = res.distance;
+            } else {
+                armor.distance_mm = 0.0;
+            }
+        }
 
         bool hasTarget = false;
         Point3f measuredPos;
         PnPResult pnpRes{};
-        double filteredYaw = 0.0, predictedYaw = 0.0;
+        double filteredYaw = 0.0;
 
         if (!armors.empty()) {
-            const Armor& target = armors[0];
-            pnpRes = pnpSolver.solveArmorPnP(target);
-            if (pnpRes.isValid) {
-                hasTarget = true;
-                measuredPos = pnpRes.position;
-                filteredYaw = tracker.updateYaw(pnpRes.yaw, timeStamp);
-                predictedYaw = tracker.predictYaw(timeStamp);
-                const auto& pts = target.armor_pts;
-                for (int i = 0; i < 4; i++) {
-                    line(frame, pts[i], pts[(i+1)%4], Scalar(0, 255, 0), 2);
+            double timestamp_ms = timeStamp * 1000.0;
+            const Armor* best = targetSelector.select(armors, timestamp_ms);
+            if (best) {
+                pnpRes = pnpSolver.solveArmorPnP(*best);
+                if (pnpRes.isValid) {
+                    hasTarget = true;
+                    measuredPos = pnpRes.position;
+
+                    // 更新卡尔曼滤波器
+                    if (!tracker.isInitialized()) {
+                        tracker.init(measuredPos, pnpRes.yaw, timeStamp);
+                    } else {
+                        tracker.updatePosition(measuredPos, timeStamp);
+                        tracker.updateYaw(pnpRes.yaw, timeStamp);
+                    }
+                    filteredYaw = tracker.getEstimatedYaw();
+                    predictedYaw = tracker.getPredictedYaw();
+
+                    const auto& pts = best->armor_pts;
+                    for (int i = 0; i < 4; i++) {
+                        line(frame, pts[i], pts[(i+1)%4], Scalar(0, 255, 0), 2);
+                    }
                 }
             }
         }
 
-        Point3f estPos;
-        if (hasTarget) {
-            if (!tracker.isInitialized()) {
-                tracker.init(measuredPos, timeStamp);
-                estPos = measuredPos;
-                predPos = measuredPos;
-            } else {
-                estPos = tracker.update(measuredPos, timeStamp);
-                predPos = tracker.getPredictionPosition();
-            }
-        } else {
-            if (tracker.isInitialized()) {
-                predPos = tracker.predict(timeStamp);
+        // 获取估计位置和预测位置
+        Point3f estPos = tracker.getEstimatedPosition();
+        if (tracker.isInitialized()) {
+            if (!hasTarget) {
+                // 没有观测时，仅预测
+                tracker.predict(timeStamp);
+                predPos = tracker.getPredictedPosition();
+                predictedYaw = tracker.getPredictedYaw();
                 estPos = tracker.getEstimatedPosition();
+            } else {
+                predPos = tracker.getPredictedPosition();
             }
         }
 
         AimAngle aim;
         if (tracker.isInitialized()) {
-            PnPResult dummy;
+            PnPResult dummy;        // 构造一个临时的 PnPResult 结构体，填充位置和 yaw 用于角度解算
             dummy.position = predPos;
             dummy.distance = norm(estPos);
             aim = angleSolver.calculateAimAngle(dummy);
@@ -242,6 +255,7 @@ int main() {
             plotter->plot(j);
         }
 
+        // 绘制卡尔曼滤波点
         if (tracker.isInitialized()) {
             if (hasTarget) {
                 Point2f ptMeas = projectPoint(measuredPos, cameraMatrix, distCoeffs);
@@ -253,6 +267,7 @@ int main() {
             circle(frame, ptPred, 3, Scalar(0, 0, 255), -1);
         }
 
+        // 绘制卡尔曼预测的装甲板框（黄色）
         if (tracker.isInitialized()) {
             const float armorWidth = 135.0f;
             const float armorHeight = 125.0f;
@@ -261,33 +276,28 @@ int main() {
             objPts[1] = predPos + Point3f( armorWidth/2, -armorHeight/2, 0);
             objPts[2] = predPos + Point3f( armorWidth/2,  armorHeight/2, 0);
             objPts[3] = predPos + Point3f(-armorWidth/2,  armorHeight/2, 0);
-            vector<Point2f> imgPts;
-            for (const auto& pt : objPts) {
-                imgPts.push_back(projectPoint(pt, cameraMatrix, distCoeffs));
-            }
-            vector<Point> intPts;
-            for (const auto& pt : imgPts) {
-                intPts.push_back(Point(cvRound(pt.x), cvRound(pt.y)));
-            }
+            vector<Point2f> imgPts;     // 投影到图像平面上的点
+            for (const auto& pt : objPts) imgPts.push_back(projectPoint(pt, cameraMatrix, distCoeffs));
+            vector<Point> intPts;   // 整数像素点用于绘制
+            for (const auto& pt : imgPts) intPts.push_back(Point(cvRound(pt.x), cvRound(pt.y)));
             polylines(frame, intPts, true, Scalar(0, 255, 255), 2);
         }
 
         if (hasTarget) {
             string posText = format("X:%.1f Y:%.1f Z:%.1f", pnpRes.position.x, pnpRes.position.y, pnpRes.position.z);
-            putText(frame, posText, Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1, LINE_AA);
+            putText(frame, posText, Point(10,30), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0,255,255), 1, LINE_AA);
             string angleText = format("Yaw: %.2f (raw) / %.2f (filt) / %.2f (pred)", pnpRes.yaw, filteredYaw, predictedYaw);
-            putText(frame, angleText, Point(10, 50), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1, LINE_AA);
+            putText(frame, angleText, Point(10,50), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0,255,255), 1, LINE_AA);
             string angleText2 = format("Pitch:%.2f Roll:%.2f", pnpRes.pitch, pnpRes.roll);
-            putText(frame, angleText2, Point(10, 70), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1, LINE_AA);
+            putText(frame, angleText2, Point(10,70), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0,255,255), 1, LINE_AA);
         } else {
-            putText(frame, "No Target", Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1, LINE_AA);
+            putText(frame, "No Target", Point(10,30), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0,255,255), 1, LINE_AA);
         }
 
         string windowName = "Armor Tracking - FPS: " + to_string((int)fps);
         setWindowTitle("Armor Tracking", windowName);
         imshow("Armor Tracking", frame);
-        char key = waitKey(1);
-        if (key == 'q' || key == 'Q') break;
+        if (waitKey(1) == 'q') break;
     }
 
     camera.stop();

@@ -356,6 +356,8 @@ CMakeFiles/aim.dir/src/CameraDriver.cpp.o: \
  /usr/include/yaml-cpp/node/convert.h \
  /usr/include/yaml-cpp/node/detail/impl.h \
  /usr/include/yaml-cpp/node/parse.h /usr/include/yaml-cpp/node/emit.h \
- /home/qiu/桌面/aim/include/CameraDriver.hpp /usr/include/CameraApi.h \
- /usr/include/CameraDefine.h /usr/include/CameraStatus.h \
+ /home/qiu/桌面/aim/include/CameraDriver.hpp \
+ /home/qiu/桌面/aim/MindVisionSdk/include/CameraApi.h \
+ /home/qiu/桌面/aim/MindVisionSdk/include/CameraDefine.h \
+ /home/qiu/桌面/aim/MindVisionSdk/include/CameraStatus.h \
  /home/qiu/桌面/aim/include/Param.hpp
