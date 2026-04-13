@@ -62,7 +62,15 @@ Mat PreProcess::process(const Mat &frame)
 
     // OTSU二值化
     Mat binary;
-    double otsu_thresh = threshold(contrast, binary, 0, 255, THRESH_BINARY | THRESH_OTSU);
+    double otsu_thresh;
+    if(c.preprocess.color == 0) // 红色
+    {
+        otsu_thresh = threshold(contrast, binary, 50, 255, THRESH_BINARY | THRESH_OTSU);
+    }
+    else if(c.preprocess.color == 1) // 蓝色
+    {
+        otsu_thresh = threshold(contrast, binary, 0, 255, THRESH_BINARY | THRESH_OTSU);
+    }
 
     // 输出OTSU阈值（每30帧输出一次）
     static int frame_count = 0;
@@ -80,6 +88,7 @@ Mat PreProcess::process(const Mat &frame)
     morphologyEx(blur, blur, MORPH_OPEN, kernel);
     morphologyEx(blur, blur, MORPH_CLOSE, kernel);
 
+    imshow("预处理结果", blur);
     return blur;
 }
 

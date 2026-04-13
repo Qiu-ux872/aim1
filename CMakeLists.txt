@@ -26,7 +26,7 @@ set(SOURCES
     src/SerialPort.cpp
     src/plotter.cpp
     src/TargetSelect.cpp
-    src/main_test.cpp
+    src/main.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})

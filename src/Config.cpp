@@ -23,6 +23,7 @@ void Config::loadYaml(const string& file_name){
         camera.rgb_gain_g = node["camera"]["rgb_gain_g"].as<float>();
         camera.rgb_gain_b = node["camera"]["rgb_gain_b"].as<float>();
 
+        preprocess.color = node["preprocess"]["color"].as<int>();
         preprocess.gaussian_k_size = node["preprocess"]["gaussian_k_size"].as<int>();
         preprocess.gaussian_sigma = node["preprocess"]["gaussian_sigma"].as<float>();
         preprocess.rdc_exposure_x = node["preprocess"]["rdc_exposure_x"].as<float>();

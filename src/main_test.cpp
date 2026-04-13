@@ -79,7 +79,7 @@ int main() {
     Mat cameraMatrix, distCoeffs;
     loadCameraParams("config/calibration.yml", cameraMatrix, distCoeffs);
 
-    string videoPath = "data/blue.mp4";
+    string videoPath = "data/red.mp4";
     VideoCapture cap(videoPath);
     if (!cap.isOpened()) {
         cerr << "无法打开视频文件: " << videoPath << endl;

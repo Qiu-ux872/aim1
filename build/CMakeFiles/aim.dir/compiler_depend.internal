@@ -3053,8 +3053,8 @@ CMakeFiles/aim.dir/src/TargetSelect.cpp.o
  /usr/include/yaml-cpp/node/emit.h
  /home/qiu/桌面/aim/include/Param.hpp
 
-CMakeFiles/aim.dir/src/main_test.cpp.o
- /home/qiu/桌面/aim/src/main_test.cpp
+CMakeFiles/aim.dir/src/main.cpp.o
+ /home/qiu/桌面/aim/src/main.cpp
  /usr/include/stdc-predef.h
  /usr/include/c++/11/iostream
  /usr/include/x86_64-linux-gnu/c++/11/bits/c++config.h
@@ -3508,7 +3508,6 @@ CMakeFiles/aim.dir/src/main_test.cpp.o
  /usr/include/nlohmann/ordered_map.hpp
  /usr/include/nlohmann/detail/macro_unscope.hpp
  /usr/include/nlohmann/thirdparty/hedley/hedley_undef.hpp
- /home/qiu/桌面/aim/include/EKF.hpp
  /home/qiu/桌面/aim/include/Config.hpp
  /usr/include/yaml-cpp/yaml.h
  /usr/include/yaml-cpp/parser.h
@@ -3542,10 +3541,14 @@ CMakeFiles/aim.dir/src/main_test.cpp.o
  /usr/include/yaml-cpp/node/detail/impl.h
  /usr/include/yaml-cpp/node/parse.h
  /usr/include/yaml-cpp/node/emit.h
+ /home/qiu/桌面/aim/include/CameraDriver.hpp
+ /home/qiu/桌面/aim/MindVisionSdk/include/CameraApi.h
+ /home/qiu/桌面/aim/MindVisionSdk/include/CameraDefine.h
+ /home/qiu/桌面/aim/MindVisionSdk/include/CameraStatus.h
  /home/qiu/桌面/aim/include/PreProcess.hpp
  /home/qiu/桌面/aim/include/Param.hpp
  /home/qiu/桌面/aim/include/PnPSolver.hpp
- /home/qiu/桌面/aim/include/KalmanTracker.hpp
+ /home/qiu/桌面/aim/include/EKF.hpp
  /home/qiu/桌面/aim/include/SerialPort.hpp
  /home/qiu/桌面/aim/include/plotter.hpp
  /usr/include/netinet/in.h
@@ -3567,6 +3570,7 @@ CMakeFiles/aim.dir/src/main_test.cpp.o
  /usr/include/asm-generic/sockios.h
  /usr/include/x86_64-linux-gnu/bits/types/struct_osockaddr.h
  /usr/include/x86_64-linux-gnu/bits/in.h
+ /home/qiu/桌面/aim/include/TargetSelect.hpp
 
 CMakeFiles/aim.dir/src/plotter.cpp.o
  /home/qiu/桌面/aim/src/plotter.cpp

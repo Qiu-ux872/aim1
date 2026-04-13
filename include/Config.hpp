@@ -26,6 +26,7 @@ struct SerialConfig{
 };
 
 struct PreProcessConfig{
+    int color = 1;    // 0 for red, 1 for blue
     int gaussian_k_size = 3;
     float gaussian_sigma = 1.3;
     float rdc_exposure_x = 0.6;
