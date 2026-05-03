@@ -1,0 +1,24 @@
+# build
+build/
+bin/
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# binary
+*.o
+*.so
+*.a
+*.out
+
+# logs
+*.log
+
+# Qt
+*.pro.user
+
+# 临时文件
+*.swp

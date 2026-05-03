@@ -1,3 +1,0 @@
-/home/qiu/桌面/aim/build/CMakeFiles/aim.dir
-/home/qiu/桌面/aim/build/CMakeFiles/edit_cache.dir
-/home/qiu/桌面/aim/build/CMakeFiles/rebuild_cache.dir
