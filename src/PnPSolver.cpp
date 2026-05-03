@@ -3,10 +3,9 @@
 
 PnPSolver::PnPSolver() {
     // 默认相机参数（备用）
-    cameraMatrix = (Mat_<double>(3,3) <<
-        800, 0, 320,
-        0, 800, 240,
-        0, 0, 1);
+    cameraMatrix = (Mat_<double>(3,3) << 800, 0, 320,
+                                         0, 800, 240,
+                                         0,   0,   1);
     distCoeffs = Mat::zeros(5, 1, CV_64F);
 
     // 小装甲板三维点（宽135mm，高125mm）
@@ -28,7 +27,6 @@ bool PnPSolver::loadCameraParams(const string& filename) {
     }
 
     Mat tmpCam, tmpDist;
-    // 尝试多种键名读取相机矩阵
     vector<string> camKeys = {"camera_matrix", "cameraMatrix"};
     for (const auto& key : camKeys) {
         fs[key] >> tmpCam;
@@ -46,7 +44,6 @@ bool PnPSolver::loadCameraParams(const string& filename) {
         return false;
     }
 
-    // 尝试多种键名读取畸变系数
     vector<string> distKeys = {"dist_coeffs", "distortion_coeffs"};
     for (const auto& key : distKeys) {
         fs[key] >> tmpDist;
@@ -56,7 +53,6 @@ bool PnPSolver::loadCameraParams(const string& filename) {
         cerr << "【警告】文件中未找到畸变系数，将使用零向量！" << endl;
         tmpDist = Mat::zeros(5, 1, CV_64F);
     } else {
-        // 确保为列向量
         if (tmpDist.rows == 1 && tmpDist.cols > 1) {
             tmpDist = tmpDist.reshape(1, tmpDist.cols);
         } else if (tmpDist.cols != 1 || tmpDist.rows < 4) {
@@ -90,7 +86,7 @@ PnPResult PnPSolver::solvePnP(const vector<Point2f>& imagePoints) {
         return result;
     }
 
-    // 使用IPPE方法解算
+    // 第一次解算
     bool success = cv::solvePnP(armorPoints, imagePoints,
                                  cameraMatrix, distCoeffs,
                                  result.rotationVec, result.translationVec,
@@ -106,82 +102,72 @@ PnPResult PnPSolver::solvePnP(const vector<Point2f>& imagePoints) {
                  result.rotationVec, result.translationVec,
                  true, SOLVEPNP_ITERATIVE);
 
-    // 计算旋转矩阵
+    // 计算旋转矩阵（用于欧拉角提取）
     Rodrigues(result.rotationVec, result.rotationMatrix);
-
-    // ===============================Debug===================================
-    cout << "yaw:" << result.rotationVec.at<double>(0) << " pitch:" << result.rotationVec.at<double>(1)
-         << " roll:" << result.rotationVec.at<double>(2) << endl;
 
     // 距离和平移向量
     result.distance = norm(result.translationVec);
     result.position = Point3f(result.translationVec.at<double>(0),
                                result.translationVec.at<double>(1),
                                result.translationVec.at<double>(2));
-                               
-    // ===============================Debug===================================
-    cout << "PnP解算成功！距离: " << result.distance << " mm" << endl;
 
-    // 计算重投影误差
-    vector<Point2f> projPoints;
-    cv::projectPoints(armorPoints, result.rotationVec, result.translationVec,
-                      cameraMatrix, distCoeffs, projPoints);
-    double error = 0;
-    for (size_t i = 0; i < imagePoints.size(); i++) {
-        error += norm(imagePoints[i] - projPoints[i]);
-    }
-    result.reprojectionError = error / imagePoints.size();
-    cout << "重投影误差:" << result.reprojectionError << endl;
-
+    // 计算欧拉角 仅用于调试
     calculateEulerAngles(result);
+
+    // 用平移向量计算的 yaw 覆盖欧拉角 yaw 
+    double x = result.translationVec.at<double>(0);
+    double y = result.translationVec.at<double>(1);
+    double z = result.translationVec.at<double>(2);
+    double yaw_from_trans = atan2(x, z) * 180.0 / CV_PI;
+    double pitch_from_trans = atan2(y, z) * 180.0 / CV_PI;
+    result.yaw = yaw_from_trans;   //  result.yaw 是目标相对于相机的水平方位角
+    result.pitch = pitch_from_trans;
+
     result.isValid = true;
     return result;
 }
 
-// 计算欧拉角
 void PnPSolver::calculateEulerAngles(PnPResult& result) {
     Mat R = result.rotationMatrix;
+
     if (abs(R.at<double>(2,0)) < 0.999) {
-        result.yaw   = atan2(R.at<double>(1,0), R.at<double>(0,0)); 
-        result.pitch = asin(-R.at<double>(2,0));
-        result.roll  = atan2(R.at<double>(2,1), R.at<double>(2,2));
+        double yaw_rad   = atan2(R.at<double>(1,0), R.at<double>(0,0));
+        double pitch_rad = asin(-R.at<double>(2,0));
+        double roll_rad  = atan2(R.at<double>(2,1), R.at<double>(2,2));
+        const double rad2deg = 180.0 / CV_PI;
+        result.yaw   = yaw_rad * rad2deg;
+        result.pitch = pitch_rad * rad2deg;
+        result.roll  = roll_rad * rad2deg;
     } else {
+        // 奇异情况（pitch = ±90°）
         result.yaw = 0;
+        const double rad2deg = 180.0 / CV_PI;
         if (R.at<double>(2,0) > 0) {
-            result.pitch = CV_PI / 2;
-            result.roll  = atan2(R.at<double>(0,1), R.at<double>(0,2));
+            result.pitch = 90.0;
+            result.roll  = atan2(R.at<double>(0,1), R.at<double>(0,2)) * rad2deg;
         } else {
-            result.pitch = -CV_PI / 2;
-            result.roll  = atan2(-R.at<double>(0,1), -R.at<double>(0,2));
+            result.pitch = -90.0;
+            result.roll  = atan2(-R.at<double>(0,1), -R.at<double>(0,2)) * rad2deg;
         }
     }
-
-    // 转换为角度制
-    const double rad2deg = 180.0 / CV_PI;
-    result.yaw   *= rad2deg;
-    result.pitch *= rad2deg;
-    result.roll  *= rad2deg;
-
-    // ============================Debug============================
-    cout << "PnP欧拉角(度): yaw=" << result.yaw << ", pitch=" << result.pitch << ", roll=" << result.roll << endl;
 }
+
 
 AngleSolver::AngleSolver() {
     const auto& config = Config::get();
-    bulletSpeed = config.ballistic.bulletSpeed;               // 弹速 (m/s)
-    gravity = config.ballistic.gravity;                       // 重力加速度 (m/s^2)
-    cameraOffset = Point3f(config.ballistic.cameraOffsetX,    // 偏移 X (mm)
-                           config.ballistic.cameraOffsetY,    // 偏移 Y (mm)
-                           config.ballistic.cameraOffsetZ);   // 偏移 Z (mm)
-    // ============================Debug=============================
+    bulletSpeed = config.ballistic.bulletSpeed;
+    gravity = config.ballistic.gravity;
+    cameraOffset = Point3f(config.ballistic.cameraOffsetX,
+                           config.ballistic.cameraOffsetY,
+                           config.ballistic.cameraOffsetZ);
     cout << "偏移x：" << cameraOffset.x << "mm 偏移y：" << cameraOffset.y << "mm 偏移z：" << cameraOffset.z << "mm" << endl;
-    cout << "G:" << gravity << "m/s^2" << endl;
-    cout << "v:" << bulletSpeed << "m/s" << endl;
+    cout << "G: " << gravity << " m/s^2" << endl;
+    cout << "弹速: " << bulletSpeed << " m/s" << endl;
 }
 
 AimAngle AngleSolver::calculateAimAngle(const PnPResult& pnpResult) {
     AimAngle aim;
-    aim.distance = static_cast<float>(pnpResult.distance / 1000.0); // mm->m
+    aim.distance = static_cast<float>(pnpResult.distance / 1000.0); // mm -> m
 
     // 目标在相机坐标系下的位置（mm）
     Point3f targetCam = pnpResult.position;
@@ -194,32 +180,22 @@ AimAngle AngleSolver::calculateAimAngle(const PnPResult& pnpResult) {
 
     float dz = targetGimbal.z / 1000.0f; // 前向距离（m）
     float dy = targetGimbal.y / 1000.0f; // 高度差（m），Y向下为正
+    float dx = targetGimbal.x / 1000.0f; // 水平偏移（m）
 
-    // 水平转角（弧度）
-    float yaw_rad = atan2(targetGimbal.x, targetGimbal.z);
-    // 俯仰角（弧度，含重力补偿）
+    // 水平转角（rad）
+    float yaw_rad = atan2(dx, dz);
+    // 俯仰角（rad）
     float pitch_rad = solvePitch(dz, dy, bulletSpeed, gravity);
 
-    // 转换为角度制并存入 aim
     const float rad2deg = 180.0f / static_cast<float>(CV_PI);
     aim.yaw   = yaw_rad * rad2deg;
     aim.pitch = pitch_rad * rad2deg;
 
-    // ==========================Debug========================
-    cout << "重力补偿后yaw:" << aim.yaw << "° pitch:" << aim.pitch << "°" << endl;
-
-    // 飞行时间 弧度计算
-    if (bulletSpeed > 0 && aim.pitch != 0) {
-        aim.flyTime = dz / (bulletSpeed * cos(pitch_rad));
-    } else {
-        aim.flyTime = 0;
-    }
-    
     return aim;
 }
 
 float AngleSolver::solvePitch(float dz, float dy, float v, float g) {
-    // 初始猜测（无重力）
+    // 初始猜测：无重力时的 pitch
     float pitch = atan2(dy, dz);
     const int maxIter = 10;
     const float eps = 1e-4f;

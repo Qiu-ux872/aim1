@@ -20,13 +20,13 @@ include_directories(
 set(SOURCES
     src/Config.cpp
     src/CameraDriver.cpp
-    src/EKF.cpp
+    src/KalmanFilter.cpp
     src/PnPSolver.cpp
     src/PreProcess.cpp
     src/SerialPort.cpp
     src/plotter.cpp
     src/TargetSelect.cpp
-    src/main_test.cpp
+    src/main.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})

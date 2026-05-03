@@ -1,0 +1,5 @@
+Log file created at: 2026/04/17 22:20:45
+Running on machine: raspberrypi
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+E0417 22:20:45.766598  2778 CameraU3VBase.cpp:782] Function:PauseVideo, Code:set_acquisition_command(0), Error:-19
+E0417 22:20:45.772259  2778 CameraU3VBase.cpp:782] Function:PauseVideo, Code:set_acquisition_command(0), Error:-19

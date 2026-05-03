@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <termios.h>
 #include <sys/ioctl.h>
+#include <errno.h>
 
 using namespace std;
 using namespace cv;
@@ -24,10 +25,9 @@ bool SerialPort::open() {
         cout << "串口已打开" << endl;
         return true;
     }
-
-    m_fd = ::open(m_port.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
+    m_fd = ::open(m_port.c_str(), O_RDWR | O_NOCTTY);
     if (m_fd == -1) {
-        cerr << "无法打开串口: " << m_port << endl;
+        cerr << "无法打开串口: " << m_port << " wrong_code:" << errno << "(" << strerror(errno) << ")" << endl;
         return false;
     }
 
@@ -90,6 +90,7 @@ void SerialPort::close() {
     }
 }
 
+// 将校验和附加到数据帧末尾 接收端重新计算并比对 检测传输是否出错
 uint8_t SerialPort::calcChecksum(const uint8_t* data, size_t len) const {
     uint8_t sum = 0;
     for (size_t i = 0; i < len; i++) {
@@ -98,6 +99,7 @@ uint8_t SerialPort::calcChecksum(const uint8_t* data, size_t len) const {
     return sum;
 }
 
+// 发送目标角度及距离函数
 bool SerialPort::sendAimAngle(const AimAngle& aim) {
     if (m_fd == -1) {
         cerr << "串口未打开" << endl;
@@ -105,7 +107,7 @@ bool SerialPort::sendAimAngle(const AimAngle& aim) {
     }
 
     // 文本格式：yaw,pitch,distance\n
-    char buffer[128];
+    char buffer[128];   // 临时字符数组
     int len = snprintf(buffer, sizeof(buffer), "%.4f,%.4f,%.4f\n",
                       aim.yaw, aim.pitch, aim.distance);
 
@@ -114,6 +116,7 @@ bool SerialPort::sendAimAngle(const AimAngle& aim) {
         return false;
     }
 
+    // 有符号字节数
     ssize_t written = write(m_fd, buffer, len);
     if (written != len) {
         cerr << "串口写入失败，实际写入 " << written << " 字节" << endl;
@@ -123,6 +126,7 @@ bool SerialPort::sendAimAngle(const AimAngle& aim) {
     return true;
 }
 
+// 发送数据
 bool SerialPort::sendData(const uint8_t* data, size_t len) {
     if (m_fd == -1) return false;
     ssize_t written = write(m_fd, data, len);

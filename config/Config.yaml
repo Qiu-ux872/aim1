@@ -1,63 +1,81 @@
 camera:
-  width: 1280
+  width: 720
   height: 720
   fps: 120
   exposure: 10000.0
   gain: 10.0
   rgb_gain_r: 1.3
-  rgb_gain_g: 1.3
+  rgb_gain_g: 1.2
   rgb_gain_b: 1.3
 
 preprocess:
+  color: 1    # 1 for blue, 0 for red
   gaussian_k_size: 5
-  gaussian_sigma: 1.3
+  gaussian_sigma: 1.2
   rdc_exposure_x: 0.35
   rdc_exposure_y: -70.0
-  morph_k_size: 5
-  min_area: 75.0
-  max_area: 5000.0
-  min_ratio: 1.9
+  morph_k_size: 3
+  min_area: 85.0
+  max_area: 20000.0
+  min_ratio: 1.2
   max_ratio: 4.2
-  max_angle: 65.0
+  max_angle: 50.0 # 90 - max_angle
 
 armor:
-  max_height_diff: 7.5
-  min_center_dist: 23.0
-  max_center_dist: 280.0
-  max_angle_diff: 55.0
-  min_w_h_ratio: 1.0
-  max_w_h_ratio: 4.0
-  min_center_bar_ratio: 0.9
-  max_center_bar_ratio: 1.4
+  max_height_diff: 7.0
+  min_center_dist: 18.0
+  max_center_dist: 300.0
+  max_angle_diff: 40.0
+  min_w_h_ratio: 1.2
+  max_w_h_ratio: 4.2
+  min_center_bar_ratio: 0.8
+  max_center_bar_ratio: 1.5
 
 ballistic:
-  bulletSpeed: 30.0
+  bulletSpeed: 10.0
   gravity: 9.8
-  camera_offset_x: 0.0
-  camera_offset_y: -40.43
-  camera_offset_z: 64.35
+  camera_offset_x: -6.75
+  camera_offset_y: -42.50
+  camera_offset_z: 18.90
 
 kalman:
-  processNoisePos: 0.1
-  processNoiseVel: 1.8
-  measurementNoisePos: 0.01
-  yawProcessNoisePos: 0.1
-  yawProcessNoiseVel: 2.5
+  # ---------------------------------
+  # 越大越相信测量值，越小越相信预测
+  processNoisePos: 0.03
+  # ---------------------------------
+  # 越大速度估计越灵活，越小越平滑但滞后
+  processNoiseVel: 10.0
+  # ---------------------------------
+  # 越大越不信任相机
+  measurementNoisePos: 0.05
+  # ---------------------------------
+  # 针对角度预测，越大越相信测量值，越小越相信预测
+  yawProcessNoisePos: 0.01
+  # ---------------------------------
+  # 越大转动速度估计越灵活，越小越平滑但滞后
+  yawProcessNoiseVel: 15.0
+  # ---------------------------------
+  # 越大越不信任相机
   yawMeasurementNoise: 0.01
-  initialErrorCov: 1.5
-  angularVelocity: 7.33
+  # ---------------------------------
+  # 越大启动时对初始状态越不信任，收敛越快
+  initialErrorCov: 10.0
+  # ---------------------------------
+  # 最大角速度
+  angularVelocity: 4
+  # ---------------------------------
 
 target_select:
-  w_center: 0.4
-  w_distance: 0.4
+  w_center: 1.0
+  w_distance: 0.8
   w_stability: 0.2
   hysteresis: 0.1
-  max_tracked: 10
-  max_distance_mm: 3000
-  lost_timeout_ms: 500
+  max_tracked: 25
+  max_distance_mm: 2000
+  lost_timeout_ms: 200
 
 serial:
-  port: "/dev/ttyUSB0"
+  port: "/dev/ttyAMA0"
   baud: 115200
 
 udp:

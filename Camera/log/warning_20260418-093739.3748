@@ -1,0 +1,5 @@
+Log file created at: 2026/04/18 09:37:39
+Running on machine: raspberrypi
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+W0418 09:37:39.304877  3752 MVCameraBase.cpp:100] Device:(name:MV-SUA134GC#0 sn:049010410190)Lost
+W0418 09:37:46.824657  3752 MVCameraBase.cpp:120] Device:(name:MV-SUA134GC#0 sn:049010410190)ReConnected, TolCount:1

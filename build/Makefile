@@ -67,8 +67,8 @@ CMAKE_BINARY_DIR = /home/qiu/桌面/aim/build
 
 # Special rule for the target edit_cache
 edit_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
-	/usr/bin/cmake-gui -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
+	/usr/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -177,29 +177,29 @@ src/Config.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/Config.cpp.s
 .PHONY : src/Config.cpp.s
 
-src/EKF.o: src/EKF.cpp.o
-.PHONY : src/EKF.o
+src/KalmanFilter.o: src/KalmanFilter.cpp.o
+.PHONY : src/KalmanFilter.o
 
 # target to build an object file
-src/EKF.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/EKF.cpp.o
-.PHONY : src/EKF.cpp.o
+src/KalmanFilter.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/KalmanFilter.cpp.o
+.PHONY : src/KalmanFilter.cpp.o
 
-src/EKF.i: src/EKF.cpp.i
-.PHONY : src/EKF.i
+src/KalmanFilter.i: src/KalmanFilter.cpp.i
+.PHONY : src/KalmanFilter.i
 
 # target to preprocess a source file
-src/EKF.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/EKF.cpp.i
-.PHONY : src/EKF.cpp.i
+src/KalmanFilter.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/KalmanFilter.cpp.i
+.PHONY : src/KalmanFilter.cpp.i
 
-src/EKF.s: src/EKF.cpp.s
-.PHONY : src/EKF.s
+src/KalmanFilter.s: src/KalmanFilter.cpp.s
+.PHONY : src/KalmanFilter.s
 
 # target to generate assembly for a file
-src/EKF.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/EKF.cpp.s
-.PHONY : src/EKF.cpp.s
+src/KalmanFilter.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/KalmanFilter.cpp.s
+.PHONY : src/KalmanFilter.cpp.s
 
 src/PnPSolver.o: src/PnPSolver.cpp.o
 .PHONY : src/PnPSolver.o
@@ -297,29 +297,29 @@ src/TargetSelect.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/TargetSelect.cpp.s
 .PHONY : src/TargetSelect.cpp.s
 
-src/main_test.o: src/main_test.cpp.o
-.PHONY : src/main_test.o
+src/main.o: src/main.cpp.o
+.PHONY : src/main.o
 
 # target to build an object file
-src/main_test.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/main_test.cpp.o
-.PHONY : src/main_test.cpp.o
+src/main.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/main.cpp.o
+.PHONY : src/main.cpp.o
 
-src/main_test.i: src/main_test.cpp.i
-.PHONY : src/main_test.i
+src/main.i: src/main.cpp.i
+.PHONY : src/main.i
 
 # target to preprocess a source file
-src/main_test.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/main_test.cpp.i
-.PHONY : src/main_test.cpp.i
+src/main.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/main.cpp.i
+.PHONY : src/main.cpp.i
 
-src/main_test.s: src/main_test.cpp.s
-.PHONY : src/main_test.s
+src/main.s: src/main.cpp.s
+.PHONY : src/main.s
 
 # target to generate assembly for a file
-src/main_test.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/main_test.cpp.s
-.PHONY : src/main_test.cpp.s
+src/main.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aim.dir/build.make CMakeFiles/aim.dir/src/main.cpp.s
+.PHONY : src/main.cpp.s
 
 src/plotter.o: src/plotter.cpp.o
 .PHONY : src/plotter.o
@@ -360,9 +360,9 @@ help:
 	@echo "... src/Config.o"
 	@echo "... src/Config.i"
 	@echo "... src/Config.s"
-	@echo "... src/EKF.o"
-	@echo "... src/EKF.i"
-	@echo "... src/EKF.s"
+	@echo "... src/KalmanFilter.o"
+	@echo "... src/KalmanFilter.i"
+	@echo "... src/KalmanFilter.s"
 	@echo "... src/PnPSolver.o"
 	@echo "... src/PnPSolver.i"
 	@echo "... src/PnPSolver.s"
@@ -375,9 +375,9 @@ help:
 	@echo "... src/TargetSelect.o"
 	@echo "... src/TargetSelect.i"
 	@echo "... src/TargetSelect.s"
-	@echo "... src/main_test.o"
-	@echo "... src/main_test.i"
-	@echo "... src/main_test.s"
+	@echo "... src/main.o"
+	@echo "... src/main.i"
+	@echo "... src/main.s"
 	@echo "... src/plotter.o"
 	@echo "... src/plotter.i"
 	@echo "... src/plotter.s"

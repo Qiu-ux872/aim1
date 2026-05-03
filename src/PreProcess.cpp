@@ -62,13 +62,14 @@ Mat PreProcess::process(const Mat &frame)
 
     // OTSU二值化
     Mat binary;
-    double otsu_thresh = threshold(contrast, binary, 0, 255, THRESH_BINARY | THRESH_OTSU);
-
-    // 输出OTSU阈值（每30帧输出一次）
-    static int frame_count = 0;
-    if (++frame_count % 30 == 0)
+    double otsu_thresh;
+    if(c.preprocess.color == 0) // red
     {
-        cout << "[预处理] OTSU阈值: " << otsu_thresh << endl;
+        otsu_thresh = threshold(contrast, binary, 50, 255, THRESH_BINARY | THRESH_OTSU);
+    }
+    else if(c.preprocess.color == 1) // blue
+    {
+        otsu_thresh = threshold(contrast, binary, 0, 255, THRESH_BINARY | THRESH_OTSU);
     }
 
     // 高斯模糊
@@ -153,17 +154,6 @@ vector<LightBar> PreProcess::detectLightBars(const Mat &blur)
         detected_bars.push_back(light);
     }
 
-    // 输出筛选统计信息
-    static int frame_count = 0;
-    if (++frame_count % 10 == 0)
-    {
-        cout << "[灯条筛选] 总轮廓:" << total
-             << " 面积过滤:" << filtered_area
-             << " 宽高比过滤:" << filtered_ratio
-             << " 角度过滤:" << filtered_angle
-             << " 保留:" << detected_bars.size() << endl;
-    }
-
     return detected_bars;
 }
 
@@ -203,11 +193,6 @@ vector<Armor> PreProcess::detectArmors(const vector<LightBar> &detected_bars, co
 {
     Config &c = Config::get();
     vector<Armor> armors;
-    if (detected_bars.size() < 2)
-    {
-        cerr << "[预处理] 识别到的灯条不足2,共识别到：" << detected_bars.size() << "根" << endl;
-        return armors;
-    }
 
     // 遍历灯条
     for (size_t i = 0; i < detected_bars.size(); i++)
